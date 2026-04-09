@@ -1,0 +1,120 @@
+# ============================================================
+# .NET / ASP.NET Core (Backend)
+# ============================================================
+
+## Build output
+bin/
+obj/
+out/
+
+## Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.slnLaunch.user
+
+## Published output
+publish/
+**/publish/
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!**/packages/repositories.config
+
+## Logs
+logs/
+*.log
+Logs/
+
+## Entity Framework migrations temp files
+*.mdf
+*.ldf
+
+## Secrets & certs
+*.pfx
+*.p12
+appsettings.Production.json
+**/secrets.json
+
+## Test results
+TestResults/
+coverage/
+*.trx
+*.coveragexml
+
+## ============================================================
+# Angular / Node (Frontend)
+# ============================================================
+
+## Dependencies
+node_modules/
+
+## Build output
+dist/
+.angular/
+
+## Environment files (keep environment.ts, ignore overrides)
+frontend/src/environments/environment.prod.ts
+
+## Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+## npm / yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+## ============================================================
+# Docker
+# ============================================================
+.env
+.env.*
+!.env.example
+
+## ============================================================
+# OS & Editor
+# ============================================================
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## VS Code
+.vscode/
+!.vscode/extensions.json
+
+## JetBrains
+.idea/
+*.iml
+
+## ============================================================
+# Project-specific
+# ============================================================
+
+## Archives (already committed)
+*.rar
+*.zip
+
+## Generated PDF / scripts
+DigitalWallet_API_Documentation.pdf
+generate_api_pdf.py
+build_output.txt
+test-results.log
+create_presentation.js
