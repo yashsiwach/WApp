@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Wallet API Flow Overview</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fa;
+            color: #333;
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 1rem;
+        }
+        .service-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2.5rem;
+            padding: 2rem;
+            border-left: 6px solid #3498db;
+            transition: transform 0.2s;
+        }
+        .service-container:hover {
+            transform: translateY(-5px);
+        }
+        .service-title {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .db-badge {
+            font-size: 0.9rem;
+            background-color: #e74c3c;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            margin-left: 15px;
+            font-weight: normal;
+        }
+        .controller-section {
+            margin-top: 1.5rem;
+            padding-left: 1rem;
+            border-left: 3px solid #ecf0f1;
+        }
+        .controller-title {
+            font-size: 1.3rem;
+            color: #34495e;
+            margin-bottom: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+        .method-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+        }
+        .get { background-color: #2ecc71; }
+        .post { background-color: #3498db; }
+        .put { background-color: #f39c12; }
+        .patch { background-color: #e67e22; }
+        .delete { background-color: #e74c3c; }
+        
+        .code-snippet {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #d35400;
+            font-size: 0.9rem;
+        }
+        .flow-text {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Digital Wallet - Internal API Flow Documentation</h1>
+    <p style="text-align:center; margin-bottom: 3rem; font-size: 1.1rem; color: #555;">
+        A comprehensive map of how each endpoint processes data, which services it invokes, the database it targets, and the resulting action flow.
+    </p>
+
+    <!-- AUTH SERVICE -->
+    <div class="service-container" style="border-left-color: #9b59b6;">
+        <h2 class="service-title">Auth Service <span class="db-badge">DB: AuthServiceDb</span></h2>
+        
+        <div class="controller-section">
+            <h3 class="controller-title">AuthController</h3>
+            <table>
+                <tr>
+                    <th width="15%">Endpoint</th>
+                    <th width="15%">Controller Action</th>
+                    <th width="25%">Service Invoked</th>
+                    <th width="45%">Work Flow & Data State</th>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /signup</td>
+                    <td><span class="code-snippet">Signup()</span></td>
+                    <td><span class="code-snippet">IAuthService.RegisterAsync()</span></td>
+                    <td><span class="flow-text">Accepts user data, hashes password using BCrypt, saves to <strong>IUserRepository</strong> via AuthDbContext. Publishes <strong>UserRegistered</strong> event to RabbitMQ. Returns token.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /login</td>
+                    <td><span class="code-snippet">Login()</span></td>
+                    <td><span class="code-snippet">IAuthService.LoginAsync()</span></td>
+                    <td><span class="flow-text">Validates credentials securely inside AuthDbContext. Calls <strong>ITokenService.GenerateTokens()</strong> to emit JWT & Refresh token.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /refresh-token</td>
+                    <td><span class="code-snippet">RefreshToken()</span></td>
+                    <td><span class="code-snippet">IAuthService.RefreshTokenAsync()</span></td>
+                    <td><span class="flow-text">Validates existing refresh token inside <strong>IRefreshTokenRepository</strong>, invalidates it, issues a new JWT pair.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /logout</td>
+                    <td><span class="code-snippet">Logout()</span></td>
+                    <td><span class="code-snippet">IAuthService.LogoutAsync()</span></td>
+                    <td><span class="flow-text">Revokes the active refresh token from the database.</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="controller-section">
+            <h3 class="controller-title">OTPController & KYCController</h3>
+            <table>
+                <tr>
+                    <th width="15%">Endpoint</th>
+                    <th width="15%">Controller Action</th>
+                    <th width="25%">Service Invoked</th>
+                    <th width="45%">Work Flow & Data State</th>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /otp/send</td>
+                    <td><span class="code-snippet">SendOTP()</span></td>
+                    <td><span class="code-snippet">IOTPService.SendAsync()</span></td>
+                    <td><span class="flow-text">Generates 6-digit code, stores it temporarily with expiration in <strong>IOTPRepository</strong>. Emits event/notifies user.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /otp/verify</td>
+                    <td><span class="code-snippet">VerifyOTP()</span></td>
+                    <td><span class="code-snippet">IOTPService.VerifyAsync()</span></td>
+                    <td><span class="flow-text">Matches submitted code against the database. Sets user status to verified.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /kyc/submit</td>
+                    <td><span class="code-snippet">SubmitKYC()</span></td>
+                    <td><span class="code-snippet">IKYCService.SubmitAsync()</span></td>
+                    <td><span class="flow-text">Stores ID/document data into <strong>IKYCRepository</strong>. Sets status to 'Pending' for Admin review.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /kyc/status</td>
+                    <td><span class="code-snippet">GetStatus()</span></td>
+                    <td><span class="code-snippet">IKYCService.GetStatusAsync()</span></td>
+                    <td><span class="flow-text">Retrieves the current approval phase of the user's KYC profile.</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- WALLET SERVICE -->
+    <div class="service-container" style="border-left-color: #2ecc71;">
+        <h2 class="service-title">Wallet Service <span class="db-badge">DB: WalletServiceDb</span></h2>
+        
+        <div class="controller-section">
+            <h3 class="controller-title">WalletController (CQRS Pattern)</h3>
+            <table>
+                <tr>
+                    <th width="15%">Endpoint</th>
+                    <th width="15%">Controller Action</th>
+                    <th width="25%">Service Invoked</th>
+                    <th width="45%">Work Flow & Data State</th>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /balance</td>
+                    <td><span class="code-snippet">GetBalance()</span></td>
+                    <td><span class="code-snippet">IWalletQueryService.GetBalance()</span></td>
+                    <td><span class="flow-text">Fetches the authenticated user's current absolute balance from WalletServiceDb.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /topup</td>
+                    <td><span class="code-snippet">TopUp()</span></td>
+                    <td><span class="code-snippet">IWalletCommand.TopUpAsync()</span></td>
+                    <td><span class="flow-text">Processes a simulated fiat deposit. Commits a TopUp transaction to the Database. Emits <strong>TopUpCompleted</strong> event via MassTransit.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /transfer</td>
+                    <td><span class="code-snippet">Transfer()</span></td>
+                    <td><span class="code-snippet">IWalletCommand.TransferAsync()</span></td>
+                    <td><span class="flow-text">Calculates deductive wallet balances, enforces double-entry rules. Commits to DB context within an atomic transaction. Emits transfer events.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /transactions</td>
+                    <td><span class="code-snippet">GetTransactions()</span></td>
+                    <td><span class="code-snippet">IWalletQueryService.Get...()</span></td>
+                    <td><span class="flow-text">Applies pagination and date filters, performs read-only database query returning flattened <strong>TransactionDto</strong> objects.</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- REWARDS SERVICE -->
+    <div class="service-container" style="border-left-color: #f1c40f;">
+        <h2 class="service-title">Rewards Service <span class="db-badge">DB: RewardsServiceDb</span></h2>
+        <div class="controller-section">
+            <h3 class="controller-title">RewardsController</h3>
+            <table>
+                <tr>
+                    <th width="15%">Endpoint</th>
+                    <th width="15%">Controller Action</th>
+                    <th width="25%">Service Invoked</th>
+                    <th width="45%">Work Flow & Data State</th>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /account</td>
+                    <td><span class="code-snippet">GetAccount()</span></td>
+                    <td><span class="code-snippet">IRewardsService.GetBalance()</span></td>
+                    <td><span class="flow-text">Retrieves how many loyalty/reward points the user holds. Points are passively generated via Wallet events.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /catalog</td>
+                    <td><span class="code-snippet">GetCatalog()</span></td>
+                    <td><span class="code-snippet">IRewardsService.GetCatalog()</span></td>
+                    <td><span class="flow-text">Reads the Rewards catalog (items that can be bought with points) from the DB.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /redeem</td>
+                    <td><span class="code-snippet">RedeemItem()</span></td>
+                    <td><span class="code-snippet">IRewardsService.RedeemAsync()</span></td>
+                    <td><span class="flow-text">Takes item ID, verifies sufficient point balance. Deducts points securely, creates a Redemption record, emits <strong>RewardRedeemed</strong> event.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /redemptions</td>
+                    <td><span class="code-snippet">GetRedemptions()</span></td>
+                    <td><span class="code-snippet">IRewardsService.GetHistory()</span></td>
+                    <td><span class="flow-text">Fetches historical data of all items the standard user has redeemed over time.</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION SERVICE -->
+    <div class="service-container" style="border-left-color: #e67e22;">
+        <h2 class="service-title">Notification Service <span class="db-badge">DB: NotificationDb</span></h2>
+        <div class="controller-section">
+            <h3 class="controller-title">NotificationsController</h3>
+            <table>
+                <tr>
+                    <th width="15%">Endpoint</th>
+                    <th width="15%">Controller Action</th>
+                    <th width="25%">Service Invoked</th>
+                    <th width="45%">Work Flow & Data State</th>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /</td>
+                    <td><span class="code-snippet">GetNotifications()</span></td>
+                    <td><span class="code-snippet">INotificationQueryService</span></td>
+                    <td><span class="flow-text">Returns a paginated list of alerts (e.g., Transfer received, KYC approved) triggered by RabbitMQ events generated across the solution.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /templates</td>
+                    <td><span class="code-snippet">GetTemplates()</span></td>
+                    <td><span class="code-snippet">ITemplateService</span></td>
+                    <td><span class="flow-text">Retrieves the HTML/Text templates for emails internally used by the system.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge put">PUT</span> /templates/{id}</td>
+                    <td><span class="code-snippet">UpdateTemplate()</span></td>
+                    <td><span class="code-snippet">ITemplateService.Update()</span></td>
+                    <td><span class="flow-text">Admin or service user updates the format/text of system templates in NotificationDb.</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- ADMIN SERVICE -->
+    <div class="service-container" style="border-left-color: #34495e;">
+        <h2 class="service-title">Admin Service <span class="db-badge">DB: AdminServiceDb</span></h2>
+        <div class="controller-section">
+            <h3 class="controller-title">KYCController & CampaignController & Dashboard</h3>
+            <table>
+                <tr>
+                    <th width="15%">Endpoint</th>
+                    <th width="15%">Controller Action</th>
+                    <th width="25%">Service Invoked</th>
+                    <th width="45%">Work Flow & Data State</th>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /kyc/pending</td>
+                    <td><span class="code-snippet">GetPendingKYC()</span></td>
+                    <td><span class="code-snippet">IAdminKYCService</span></td>
+                    <td><span class="flow-text">Administrators fetch a list of unapproved documents synchronized via distributed messaging or database sync.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /kyc/{id}/approve</td>
+                    <td><span class="code-snippet">ApproveKYC()</span></td>
+                    <td><span class="code-snippet">IAdminKYCService.Approve()</span></td>
+                    <td><span class="flow-text">Admin clicks approve. Updates internal DB status, publishes an overarching <strong>KYCApproved</strong> event to lift user restrictions on the Wallet side.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /dashboard</td>
+                    <td><span class="code-snippet">GetDashboardStats()</span></td>
+                    <td><span class="code-snippet">IDashboardService</span></td>
+                    <td><span class="flow-text">Aggregates system-wide data (users count, transfer volume) to display operational metrics to standard Admins.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /campaign</td>
+                    <td><span class="code-snippet">CreateCampaign()</span></td>
+                    <td><span class="code-snippet">ICampaignService.Create()</span></td>
+                    <td><span class="flow-text">Inserts a marketing/fidelity campaign into AdminServiceDb. Active campaigns can trigger bonus points in the Rewards loop.</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- SUPPORT TICKET SERVICE -->
+    <div class="service-container" style="border-left-color: #e74c3c;">
+        <h2 class="service-title">Support Ticket Service <span class="db-badge">DB: SupportServiceDb</span></h2>
+        <div class="controller-section">
+            <h3 class="controller-title">UserTickets & AdminTickets Controllers</h3>
+            <table>
+                <tr>
+                    <th width="15%">Endpoint</th>
+                    <th width="15%">Controller Action</th>
+                    <th width="25%">Service Invoked</th>
+                    <th width="45%">Work Flow & Data State</th>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /tickets</td>
+                    <td><span class="code-snippet">CreateTicket()</span></td>
+                    <td><span class="code-snippet">ISupportService.Create()</span></td>
+                    <td><span class="flow-text">Normal user generates a Helpdesk ticket. Inserted into SupportServiceDb.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge get">GET</span> /tickets/{id}</td>
+                    <td><span class="code-snippet">GetTicketDetails()</span></td>
+                    <td><span class="code-snippet">ISupportService.Get()</span></td>
+                    <td><span class="flow-text">Retrieves the primary ticket issue and loads all associated threaded replies.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge post">POST</span> /{id}/replies</td>
+                    <td><span class="code-snippet">AddReply()</span></td>
+                    <td><span class="code-snippet">ISupportService.AddReply()</span></td>
+                    <td><span class="flow-text">Adds a threaded comment/reply to an active ticket ID. Emits a generic system-wide Event so Admins/Users get notified.</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method-badge patch">PATCH</span> /admin/tickets/{id}/status</td>
+                    <td><span class="code-snippet">UpdateTicketStatus()</span></td>
+                    <td><span class="code-snippet">IAdminSupport.UpdateStatus()</span></td>
+                    <td><span class="flow-text">Admin marks a ticket as Resolved, InProgress, etc. Stays in SupportServiceDb.</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

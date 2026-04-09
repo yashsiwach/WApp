@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
+
+/* Global styles */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(245, 158, 11, 0.12), transparent 32%),
+    radial-gradient(circle at 90% 85%, rgba(251, 191, 36, 0.1), transparent 28%),
+    linear-gradient(160deg, #09090b 0%, #111215 45%, #1a1d22 100%);
+  color: #e4e4e7;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Sora', 'Manrope', sans-serif;
+}
+
+@layer base {
+  input,
+  select,
+  textarea {
+    color: #f4f4f5;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #71717a;
+  }
+
+  select option {
+    background-color: #111215;
+    color: #f4f4f5;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: #f4f4f5;
+    -webkit-box-shadow: 0 0 0 1000px #09090b inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #18181b;
+}
+::-webkit-scrollbar-thumb {
+  background: #52525b;
+  border-radius: 3px;
+}
+
+::selection {
+  background: rgba(245, 158, 11, 0.35);
+  color: #fff;
+}
