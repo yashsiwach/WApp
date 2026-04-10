@@ -1,0 +1,171 @@
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SA_PASSWORD}", "-Q", "SELECT 1", "-C"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ── Backend Services ─────────────────────────────────────────────────────────
+
+  authservice:
+    build:
+      context: ./DigitalWallet/src
+      dockerfile: Services/AuthService/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Kestrel__Endpoints__Http__Url=http://0.0.0.0:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AuthServiceDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  walletservice:
+    build:
+      context: ./DigitalWallet/src
+      dockerfile: Services/WalletService/Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Kestrel__Endpoints__Http__Url=http://0.0.0.0:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=WalletServiceDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - AuthService__BaseUrl=http://authservice:80
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  rewardsservice:
+    build:
+      context: ./DigitalWallet/src
+      dockerfile: Services/RewardsService/Dockerfile
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Kestrel__Endpoints__Http__Url=http://0.0.0.0:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=RewardsServiceDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  notificationservice:
+    build:
+      context: ./DigitalWallet/src
+      dockerfile: Services/NotificationService/Dockerfile
+    ports:
+      - "5004:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Kestrel__Endpoints__Http__Url=http://0.0.0.0:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=NotificationServiceDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  adminservice:
+    build:
+      context: ./DigitalWallet/src
+      dockerfile: Services/AdminService/Dockerfile
+    ports:
+      - "5005:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Kestrel__Endpoints__Http__Url=http://0.0.0.0:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=AdminServiceDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - ConnectionStrings__RewardsConnection=Server=sqlserver,1433;Database=RewardsServiceDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  supportticketservice:
+    build:
+      context: ./DigitalWallet/src
+      dockerfile: Services/SupportTicketService/Dockerfile
+    ports:
+      - "5006:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Kestrel__Endpoints__Http__Url=http://0.0.0.0:80
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=SupportTicketServiceDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - RabbitMQ__Host=rabbitmq
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: ./DigitalWallet/src
+      dockerfile: Gateway/Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - Kestrel__Endpoints__Http__Url=http://0.0.0.0:80
+    depends_on:
+      - authservice
+      - walletservice
+      - rewardsservice
+      - notificationservice
+      - adminservice
+      - supportticketservice
+
+  # ── Frontend ─────────────────────────────────────────────────────────────────
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - gateway
+
+volumes:
+  sqlserver_data:
+  rabbitmq_data:
