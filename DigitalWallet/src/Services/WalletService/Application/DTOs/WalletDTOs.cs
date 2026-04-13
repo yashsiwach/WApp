@@ -55,3 +55,14 @@ public record TransactionDto
     public string Description { get; init; } = string.Empty;
     public DateTime CreatedAt { get; init; }
 }
+
+// —— Admin Financial Stats ——
+public record WalletAdminStatsDto
+{
+    public int TotalTransactionCount { get; init; }
+    public decimal TotalVolume { get; init; }
+    public decimal TodaysVolume { get; init; }
+    public int TodaysTransactionCount { get; init; }
+    public int FailedTransactions { get; init; }
+    public decimal AverageTransactionValue { get; init; }
+}

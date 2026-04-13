@@ -27,4 +27,18 @@ public class RewardsCatalogController : ControllerBase
         var result = await _svc.CreateAsync(GetAdminId(), request);
         return StatusCode(StatusCodes.Status201Created, ApiResponse<CatalogItemAdminDto>.Ok(result, "Catalog item created."));
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCatalogItemRequest request)
+    {
+        var result = await _svc.UpdateAsync(GetAdminId(), id, request);
+        return Ok(ApiResponse<CatalogItemAdminDto>.Ok(result, "Catalog item updated."));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        await _svc.DeleteAsync(GetAdminId(), id);
+        return Ok(ApiResponse<object>.Ok(null, "Catalog item deleted."));
+    }
 }

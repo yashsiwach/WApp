@@ -14,12 +14,12 @@ import { KycInfo } from '../../../shared/models/auth.model';
   standalone: true,
   imports: [ReactiveFormsModule, LoaderComponent, DatePipe],
   template: `
-    <div class="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 class="text-2xl font-display font-bold text-zinc-100">KYC Verification</h1>
-      <p class="text-zinc-400 text-sm">Submit a document type and hosted file URL so the backend review flow can process your verification.</p>
+    <div class="mx-auto max-w-2xl space-y-6 p-6 text-slate-900">
+      <h1 class="text-2xl font-display font-bold text-slate-900">KYC Verification</h1>
+      <p class="text-sm text-slate-500">Submit a document type and hosted file URL so the backend review flow can process your verification.</p>
 
-      <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl shadow p-6">
-        <h2 class="text-lg font-semibold text-zinc-100 mb-4">Latest Submission</h2>
+      <div class="rounded-xl border border-slate-200 bg-white/95 p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-semibold text-slate-900">Latest Submission</h2>
         <app-loader [show]="loadingStatus" />
 
         @if (!loadingStatus) {
@@ -29,54 +29,54 @@ import { KycInfo } from '../../../shared/models/auth.model';
                 <span
                   class="px-3 py-1 rounded-full text-sm font-semibold"
                   [class.bg-emerald-500/20]="kycInfo.status === 'Approved'"
-                  [class.text-emerald-300]="kycInfo.status === 'Approved'"
-                  [class.bg-yellow-500/20]="kycInfo.status === 'Pending'"
-                  [class.text-yellow-300]="kycInfo.status === 'Pending'"
+                  [class.text-emerald-700]="kycInfo.status === 'Approved'"
+                  [class.bg-blue-500/20]="kycInfo.status === 'Pending'"
+                  [class.text-blue-700]="kycInfo.status === 'Pending'"
                   [class.bg-rose-500/20]="kycInfo.status === 'Rejected'"
-                  [class.text-rose-300]="kycInfo.status === 'Rejected'"
+                  [class.text-rose-700]="kycInfo.status === 'Rejected'"
                 >{{ kycInfo.status }}</span>
                 @if (kycInfo.status === 'Approved') {
-                  <span class="text-emerald-300 text-sm">Your identity is verified.</span>
+                  <span class="text-emerald-700 text-sm">Your identity is verified.</span>
                 } @else if (kycInfo.status === 'Pending') {
-                  <span class="text-zinc-400 text-sm">Under review, usually within 24 hours.</span>
+                  <span class="text-sm text-slate-500">Under review, usually within 24 hours.</span>
                 } @else if (kycInfo.status === 'Rejected') {
-                  <span class="text-rose-300 text-sm">Rejected. You can submit a fresh document below.</span>
+                  <span class="text-rose-700 text-sm">Rejected. You can submit a fresh document below.</span>
                 }
               </div>
 
               <div class="grid grid-cols-2 gap-3 text-sm mt-2">
                 <div>
-                  <p class="text-zinc-500 text-xs mb-0.5">Document Type</p>
-                  <p class="text-zinc-200">{{ kycInfo.docType }}</p>
+                  <p class="mb-0.5 text-xs text-slate-500">Document Type</p>
+                  <p class="text-slate-700">{{ kycInfo.docType }}</p>
                 </div>
                 <div>
-                  <p class="text-zinc-500 text-xs mb-0.5">Submitted</p>
-                  <p class="text-zinc-200">{{ kycInfo.submittedAt | date:'dd MMM yyyy, HH:mm' }}</p>
+                  <p class="mb-0.5 text-xs text-slate-500">Submitted</p>
+                  <p class="text-slate-700">{{ kycInfo.submittedAt | date:'dd MMM yyyy, HH:mm' }}</p>
                 </div>
               </div>
 
               @if (kycInfo.reviewNotes) {
-                <div class="mt-3 rounded-lg border border-zinc-700 bg-zinc-800/50 p-3 text-sm">
-                  <p class="text-zinc-400 text-xs mb-1">{{ kycInfo.status === 'Rejected' ? 'Rejection Reason' : 'Admin Note' }}</p>
-                  <p class="text-zinc-200 whitespace-pre-wrap">{{ kycInfo.reviewNotes }}</p>
+                <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+                  <p class="mb-1 text-xs text-slate-500">{{ kycInfo.status === 'Rejected' ? 'Rejection Reason' : 'Admin Note' }}</p>
+                  <p class="whitespace-pre-wrap text-slate-700">{{ kycInfo.reviewNotes }}</p>
                 </div>
               }
             </div>
           } @else {
-            <p class="text-zinc-500 text-sm">No KYC submission on file. Submit your document below.</p>
+            <p class="text-sm text-slate-500">No KYC submission on file. Submit your document below.</p>
           }
         }
       </div>
 
       @if (!kycInfo || kycInfo.status === 'Rejected') {
-        <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl shadow p-6">
-          <h2 class="text-lg font-semibold text-zinc-100 mb-4">Submit KYC Document</h2>
+        <div class="rounded-xl border border-slate-200 bg-white/95 p-6 shadow-sm">
+          <h2 class="mb-4 text-lg font-semibold text-slate-900">Submit KYC Document</h2>
           <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Document Type</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Document Type</label>
               <select
                 formControlName="docType"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 text-zinc-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 [class.border-red-500]="submitted && form.controls.docType.invalid"
               >
                 <option value="">Select document type</option>
@@ -90,12 +90,12 @@ import { KycInfo } from '../../../shared/models/auth.model';
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Hosted File URL</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Hosted File URL</label>
               <input
                 type="url"
                 formControlName="fileUrl"
                 placeholder="https://example.com/my-document.pdf"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 text-zinc-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 [class.border-red-500]="submitted && form.controls.fileUrl.invalid"
               />
               @if (submitted && form.controls.fileUrl.invalid) {
@@ -103,7 +103,7 @@ import { KycInfo } from '../../../shared/models/auth.model';
               }
             </div>
 
-            <div class="bg-zinc-800/50 rounded-lg p-3 text-xs text-zinc-400">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500">
               The current backend contract accepts a document type and file URL for KYC submissions.
             </div>
 

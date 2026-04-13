@@ -165,6 +165,10 @@ if (app.Environment.IsDevelopment())
     {
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+        // If tables were created outside of EF (e.g. manual SQL / EnsureCreated), mark
+        // InitialCreate as applied before calling Migrate() to avoid the "object already
+        // exists" collision.
+        ReconcileMigrationHistory(db);
         db.Database.Migrate();
     }
     catch (Exception ex)
@@ -183,4 +187,71 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+// ── Reconcile migration history ──────────────────────────────────────────────
+// Called before Database.Migrate() to handle the case where the schema was
+// created outside EF migrations (manual SQL, EnsureCreated, prior tooling).
+// It marks InitialCreate as applied in __EFMigrationsHistory so EF Core skips
+// the CREATE TABLE statements that would otherwise conflict with existing tables.
+static void ReconcileMigrationHistory(AuthDbContext db)
+{
+    const string migrationId     = "20260409120805_InitialCreate";
+    const string productVersion  = "8.0.12"; // must match snapshot ProductVersion
+
+    // Use a dedicated connection so we don't interfere with EF Core's own connection.
+    var connStr = db.Database.GetConnectionString()!;
+    using var conn = new Microsoft.Data.SqlClient.SqlConnection(connStr);
+    conn.Open();
+
+    // 1. Create __EFMigrationsHistory if it doesn't exist yet.
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText = @"
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.objects
+                WHERE name = '__EFMigrationsHistory' AND type = 'U'
+            )
+            CREATE TABLE [__EFMigrationsHistory] (
+                [MigrationId]    nvarchar(150) NOT NULL,
+                [ProductVersion] nvarchar(32)  NOT NULL,
+                CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+            )";
+        cmd.ExecuteNonQuery();
+    }
+
+    // 2. Check whether the Users table already exists.
+    bool usersExists;
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText =
+            "SELECT COUNT(1) FROM INFORMATION_SCHEMA.TABLES " +
+            "WHERE TABLE_NAME = 'Users' AND TABLE_SCHEMA = 'dbo'";
+        usersExists = (int)cmd.ExecuteScalar()! > 0;
+    }
+
+    // 3. Check whether InitialCreate is already recorded.
+    bool alreadyRecorded;
+    using (var cmd = conn.CreateCommand())
+    {
+        cmd.CommandText =
+            "SELECT COUNT(1) FROM [__EFMigrationsHistory] WHERE [MigrationId] = @id";
+        cmd.Parameters.Add(new Microsoft.Data.SqlClient.SqlParameter("@id", migrationId));
+        alreadyRecorded = (int)cmd.ExecuteScalar()! > 0;
+    }
+
+    // 4. If tables exist but migration isn't recorded, mark it applied.
+    if (usersExists && !alreadyRecorded)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            "INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion]) " +
+            "VALUES (@id, @ver)";
+        cmd.Parameters.Add(new Microsoft.Data.SqlClient.SqlParameter("@id",  migrationId));
+        cmd.Parameters.Add(new Microsoft.Data.SqlClient.SqlParameter("@ver", productVersion));
+        cmd.ExecuteNonQuery();
+        Log.Information(
+            "Reconciled migration history: marked {MigrationId} as applied " +
+            "(schema pre-existed EF migration tracking).", migrationId);
+    }
 }

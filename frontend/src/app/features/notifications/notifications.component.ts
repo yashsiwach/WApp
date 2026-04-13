@@ -10,39 +10,39 @@ import { NotificationDto } from '../../shared/models/notification.model';
   standalone: true,
   imports: [DatePipe, LoaderComponent],
   template: `
-    <div class="p-6 max-w-3xl mx-auto space-y-6">
+    <div class="mx-auto max-w-3xl space-y-6 p-6 text-slate-900">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-display font-bold text-zinc-100">Notifications</h1>
+        <h1 class="text-2xl font-display font-bold text-slate-900">Notifications</h1>
       </div>
 
       <app-loader [show]="loading" />
 
       @if (!loading) {
         @if (notifications.length === 0) {
-          <div class="text-center py-16 text-zinc-500">
+          <div class="py-16 text-center text-slate-500">
             <div class="text-5xl mb-3">Inbox</div>
             <p>No notifications yet</p>
           </div>
         } @else {
           <div class="space-y-3">
             @for (n of notifications; track n.id) {
-              <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl shadow p-5 flex flex-col gap-3 transition-colors">
+              <div class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white/95 p-5 shadow-sm transition-colors hover:border-slate-300">
                 <div class="min-w-0">
-                  <p class="font-medium text-sm text-zinc-100">{{ n.subject }}</p>
+                  <p class="text-sm font-medium text-slate-900">{{ n.subject }}</p>
                   <div class="flex items-center gap-2 mt-2 flex-wrap">
-                    <span class="text-xs px-1.5 py-0.5 bg-zinc-800 text-zinc-300 rounded">{{ n.type }}</span>
-                    <span class="text-xs px-1.5 py-0.5 bg-zinc-800 text-zinc-400 rounded">{{ n.channel }}</span>
+                    <span class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700">{{ n.type }}</span>
+                    <span class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">{{ n.channel }}</span>
                     <span
                       class="text-xs px-1.5 py-0.5 rounded"
                       [class.bg-emerald-500/20]="n.status === 'Sent' || n.status === 'Delivered'"
-                      [class.text-emerald-300]="n.status === 'Sent' || n.status === 'Delivered'"
-                      [class.bg-yellow-500/20]="n.status !== 'Sent' && n.status !== 'Delivered'"
-                      [class.text-yellow-300]="n.status !== 'Sent' && n.status !== 'Delivered'"
+                      [class.text-emerald-700]="n.status === 'Sent' || n.status === 'Delivered'"
+                      [class.bg-blue-500/20]="n.status !== 'Sent' && n.status !== 'Delivered'"
+                      [class.text-blue-700]="n.status !== 'Sent' && n.status !== 'Delivered'"
                     >
                       {{ n.status }}
                     </span>
                   </div>
-                  <div class="mt-2 text-zinc-500 text-xs">
+                  <div class="mt-2 text-xs text-slate-500">
                     <div>Created: {{ n.createdAt | date:'dd MMM, HH:mm' }}</div>
                     @if (n.sentAt) {
                       <div>Sent: {{ n.sentAt | date:'dd MMM, HH:mm' }}</div>
@@ -54,17 +54,17 @@ import { NotificationDto } from '../../shared/models/notification.model';
           </div>
 
           <div class="flex items-center justify-between text-sm">
-            <span class="text-zinc-400">Page {{ page }} of {{ totalPages }}</span>
+            <span class="text-slate-500">Page {{ page }} of {{ totalPages }}</span>
             <div class="flex gap-2">
               <button
                 (click)="prevPage()"
                 [disabled]="page === 1"
-                class="px-3 py-1.5 border border-zinc-700 rounded-lg hover:bg-zinc-800 disabled:opacity-40"
+                class="rounded-lg border border-slate-300 px-3 py-1.5 hover:bg-slate-100 disabled:opacity-40"
               >Prev</button>
               <button
                 (click)="nextPage()"
                 [disabled]="page >= totalPages"
-                class="px-3 py-1.5 border border-zinc-700 rounded-lg hover:bg-zinc-800 disabled:opacity-40"
+                class="rounded-lg border border-slate-300 px-3 py-1.5 hover:bg-slate-100 disabled:opacity-40"
               >Next</button>
             </div>
           </div>

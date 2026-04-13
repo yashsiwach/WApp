@@ -81,13 +81,24 @@ public class RewardsServiceTests
     }
 
     [Test]
-    public async Task GetAccountAsync_WhenNotFound_ThrowsKeyNotFoundException()
+    public async Task GetAccountAsync_WhenNotFound_AutoCreatesAccountAndReturnsDto()
     {
         _accountsMock.Setup(a => a.FindByUserIdAsync(It.IsAny<Guid>())).ReturnsAsync((RewardsAccount?)null);
 
-        Func<Task> act = async () => await _service.GetAccountAsync(Guid.NewGuid());
+        RewardsAccount? createdAccount = null;
+        _accountsMock
+            .Setup(a => a.AddAsync(It.IsAny<RewardsAccount>()))
+            .Callback<RewardsAccount>(a => createdAccount = a);
 
-        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("*not found*");
+        var result = await _service.GetAccountAsync(Guid.NewGuid());
+
+        result.Should().NotBeNull();
+        result.PointsBalance.Should().Be(0);
+        result.LifetimePoints.Should().Be(0);
+
+        createdAccount.Should().NotBeNull();
+        _accountsMock.Verify(a => a.AddAsync(It.IsAny<RewardsAccount>()), Times.Once);
+        _uowMock.Verify(u => u.SaveAsync(), Times.Once);
     }
 
     // ── GetCatalogAsync ───────────────────────────────────────────────────────
@@ -167,13 +178,10 @@ public class RewardsServiceTests
         _accountsMock.Setup(a => a.FindByUserIdAsync(userId)).ReturnsAsync(account);
         _catalogMock.Setup(c => c.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync((RewardsCatalogItem?)null);
 
-        var tx = new Mock<IDbContextTransaction>();
-        _uowMock.Setup(u => u.BeginTransactionAsync()).ReturnsAsync(tx.Object);
-
         Func<Task> act = async () => await _service.RedeemAsync(userId, new RedeemRequestDto { CatalogItemId = Guid.NewGuid() });
 
         await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Catalog item not found.");
-        tx.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _uowMock.Verify(u => u.BeginTransactionAsync(), Times.Never);
     }
 
     [Test]
@@ -186,13 +194,10 @@ public class RewardsServiceTests
         _accountsMock.Setup(a => a.FindByUserIdAsync(userId)).ReturnsAsync(account);
         _catalogMock.Setup(c => c.FindByIdAsync(item.Id)).ReturnsAsync(item);
 
-        var tx = new Mock<IDbContextTransaction>();
-        _uowMock.Setup(u => u.BeginTransactionAsync()).ReturnsAsync(tx.Object);
-
         Func<Task> act = async () => await _service.RedeemAsync(userId, new RedeemRequestDto { CatalogItemId = item.Id });
 
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*no longer available*");
-        tx.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _uowMock.Verify(u => u.BeginTransactionAsync(), Times.Never);
     }
 
     [Test]

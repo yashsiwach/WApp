@@ -6,26 +6,26 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Manrope', 'Segoe UI', 'sans-serif'],
-        display: ['Sora', 'Segoe UI', 'sans-serif'],
+        body: ['Outfit', 'Segoe UI', 'sans-serif'],
+        display: ['Epilogue', 'Segoe UI', 'sans-serif'],
       },
       colors: {
         navy: {
-          DEFAULT: '#18181B',
-          dark: '#09090B',
-          light: '#27272A',
+          DEFAULT: '#1E3A8A',
+          dark: '#172554',
+          light: '#1D4ED8',
         },
         accent: {
-          DEFAULT: '#F59E0B',
-          hover: '#D97706',
-          soft: '#FCD34D',
+          DEFAULT: '#2563EB',
+          hover: '#1D4ED8',
+          soft: '#93C5FD',
         },
         surface: {
-          950: '#09090B',
-          900: '#111215',
-          800: '#1A1D22',
-          700: '#262A31',
-          600: '#3A404A',
+          950: '#F8FAFF',
+          900: '#EEF4FF',
+          800: '#E3EDFF',
+          700: '#CBDDFF',
+          600: '#AFC9FF',
         },
         tier: {
           bronze: '#CD7F32',

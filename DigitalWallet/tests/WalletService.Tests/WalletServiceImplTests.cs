@@ -77,13 +77,24 @@ public class WalletServiceImplTests
     }
 
     [Test]
-    public async Task GetBalanceAsync_WhenWalletNotFound_ThrowsKeyNotFoundException()
+    public async Task GetBalanceAsync_WhenWalletNotFound_AutoCreatesWalletAndReturnsZeroBalance()
     {
         _accountsMock.Setup(a => a.FindByUserIdAsync(It.IsAny<Guid>())).ReturnsAsync((WalletAccount?)null);
 
-        Func<Task> act = async () => await _service.GetBalanceAsync(Guid.NewGuid());
+        WalletAccount? createdWallet = null;
+        _accountsMock
+            .Setup(a => a.AddAsync(It.IsAny<WalletAccount>()))
+            .Callback<WalletAccount>(w => createdWallet = w);
 
-        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("*not found*");
+        var result = await _service.GetBalanceAsync(Guid.NewGuid());
+
+        result.Should().NotBeNull();
+        result.Balance.Should().Be(0m);
+        result.Currency.Should().Be("INR");
+
+        createdWallet.Should().NotBeNull();
+        _accountsMock.Verify(a => a.AddAsync(It.IsAny<WalletAccount>()), Times.Once);
+        _uowMock.Verify(u => u.SaveAsync(), Times.Once);
     }
 
     // ── TopUpAsync ────────────────────────────────────────────────────────────

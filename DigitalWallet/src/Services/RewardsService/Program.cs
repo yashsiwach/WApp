@@ -140,22 +140,16 @@ app.MapControllers();
 // ── Auto-migrate (dev) ──
 if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<RewardsDbContext>();
-    db.Database.EnsureCreated();
-
-    // Seed default earn rules if missing (HasData only runs on first EnsureCreated,
-    // so existing databases need this explicit upsert).
-    db.Database.ExecuteSqlRaw("""
-        IF NOT EXISTS (SELECT 1 FROM EarnRules WHERE Id = '11111111-0000-0000-0000-000000000001')
-            INSERT INTO EarnRules (Id, Name, TriggerType, PointsPerRupee, IsActive, CreatedAt)
-            VALUES ('11111111-0000-0000-0000-000000000001', 'TopUp Earn', 'TopUp', 0.01, 1, '2024-01-01');
-        """);
-    db.Database.ExecuteSqlRaw("""
-        IF NOT EXISTS (SELECT 1 FROM EarnRules WHERE Id = '11111111-0000-0000-0000-000000000002')
-            INSERT INTO EarnRules (Id, Name, TriggerType, PointsPerRupee, IsActive, CreatedAt)
-            VALUES ('11111111-0000-0000-0000-000000000002', 'Transfer Earn', 'Transfer', 0.005, 1, '2024-01-01');
-        """);
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<RewardsDbContext>();
+        db.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "Development database migration failed. RewardsService will continue running.");
+    }
 }
 
 app.Run();

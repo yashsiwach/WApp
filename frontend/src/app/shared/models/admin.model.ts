@@ -62,3 +62,42 @@ export interface CreateCatalogItemRequest {
   pointsCost: number;
   category: string;
 }
+
+export interface UpdateCatalogItemRequest {
+  name: string;
+  description: string;
+  pointsCost: number;
+  category: string;
+  isActive: boolean;
+}
+
+export interface AdminDashboardStatsDto {
+  pendingKYCCount: number;
+  approvedKYCToday: number;
+  rejectedKYCToday: number;
+  adminActionsToday: number;
+}
+
+export interface NotificationTemplateDto {
+  id: string;
+  type: string;
+  channel: string;
+  subject: string;
+  bodyTemplate: string;
+  isActive: boolean;
+}
+
+export interface UpdateNotificationTemplateRequest {
+  subject: string;
+  bodyTemplate: string;
+  isActive: boolean;
+}
+
+export interface WalletAdminStatsDto {
+  totalTransactionCount: number;
+  totalVolume: number;
+  todaysVolume: number;
+  todaysTransactionCount: number;
+  failedTransactions: number;
+  averageTransactionValue: number;
+}

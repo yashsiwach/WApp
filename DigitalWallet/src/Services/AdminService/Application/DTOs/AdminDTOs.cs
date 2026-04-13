@@ -47,6 +47,15 @@ public record CreateCatalogItemRequest
     public int StockQuantity { get; init; } = -1;
 }
 
+public record UpdateCatalogItemRequest
+{
+    public string Name { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+    public int PointsCost { get; init; }
+    public string Category { get; init; } = string.Empty;
+    public bool IsAvailable { get; init; }
+}
+
 public record CatalogItemAdminDto
 {
     public Guid Id { get; init; }

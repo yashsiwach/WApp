@@ -136,10 +136,10 @@ if (app.Environment.IsDevelopment())
         using var scope = app.Services.CreateScope();
 
         var adminDb = scope.ServiceProvider.GetRequiredService<AdminDbContext>();
-        adminDb.Database.Migrate();
+        adminDb.Database.EnsureCreated();
 
-        var rewardsDb = scope.ServiceProvider.GetRequiredService<RewardsAdminDbContext>();
-        rewardsDb.Database.Migrate();
+        // RewardsAdminDbContext is read-only access to RewardsServiceDb;
+        // schema is owned and created by RewardsService — do not migrate here.
     }
     catch (Exception ex)
     {

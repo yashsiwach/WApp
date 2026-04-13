@@ -11,9 +11,9 @@ import { SupportTicketDto } from '../../shared/models/support.model';
   standalone: true,
   imports: [DatePipe, ReactiveFormsModule],
   template: `
-    <div class="p-6 max-w-4xl mx-auto space-y-6">
+    <div class="mx-auto max-w-4xl space-y-6 p-6 text-slate-900">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-display font-bold text-zinc-100">Support Tickets</h1>
+        <h1 class="text-2xl font-display font-bold text-slate-900">Support Tickets</h1>
         <button
           (click)="showCreate = true"
           class="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg font-medium text-sm transition-colors"
@@ -26,13 +26,13 @@ import { SupportTicketDto } from '../../shared/models/support.model';
       @if (loading && !selectedTicket) {
         <div class="space-y-3">
           @for (i of [1, 2, 3]; track i) {
-            <div class="bg-zinc-900 border border-zinc-800 rounded-xl shadow p-5 animate-pulse">
+            <div class="animate-pulse rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div class="flex items-start justify-between gap-3">
                 <div class="flex-1 space-y-2">
-                  <div class="h-4 bg-zinc-700 rounded w-2/3"></div>
-                  <div class="h-3 bg-zinc-800 rounded w-1/3"></div>
+                  <div class="h-4 w-2/3 rounded bg-slate-200"></div>
+                  <div class="h-3 w-1/3 rounded bg-slate-100"></div>
                 </div>
-                <div class="h-5 w-20 bg-zinc-700 rounded-full shrink-0"></div>
+                <div class="h-5 w-20 shrink-0 rounded-full bg-slate-200"></div>
               </div>
             </div>
           }
@@ -42,13 +42,13 @@ import { SupportTicketDto } from '../../shared/models/support.model';
       @if (!loading) {
         <!-- ── Ticket detail view ── -->
         @if (selectedTicket) {
-          <div class="bg-zinc-900 border border-zinc-800 rounded-xl shadow p-6">
+          <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <div class="flex items-center gap-3 mb-5">
               <button
                 (click)="selectedTicket = null"
-                class="text-zinc-500 hover:text-zinc-300 text-lg font-bold"
+                class="text-lg font-bold text-slate-400 hover:text-slate-700"
               >← Back</button>
-              <h2 class="font-semibold text-zinc-100 flex-1">{{ selectedTicket.subject }}</h2>
+              <h2 class="flex-1 font-semibold text-slate-900">{{ selectedTicket.subject }}</h2>
               <span
                 class="px-2 py-0.5 rounded-full text-xs font-semibold shrink-0"
                 [class]="statusClass(selectedTicket.status)"
@@ -56,7 +56,7 @@ import { SupportTicketDto } from '../../shared/models/support.model';
             </div>
 
             <!-- Ticket number + metadata -->
-            <p class="text-xs text-zinc-500 mb-4">
+            <p class="mb-4 text-xs text-slate-500">
               #{{ selectedTicket.ticketNumber }} &bull;
               {{ selectedTicket.category }} &bull;
               Priority: {{ selectedTicket.priority }} &bull;
@@ -64,24 +64,24 @@ import { SupportTicketDto } from '../../shared/models/support.model';
             </p>
 
             <!-- User's original message -->
-            <div class="bg-zinc-800 rounded-lg p-4 mb-3">
-              <p class="text-xs font-medium text-zinc-400 mb-1">You</p>
-              <p class="text-zinc-200 text-sm">{{ selectedTicket.description }}</p>
+            <div class="mb-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <p class="mb-1 text-xs font-medium text-slate-500">You</p>
+              <p class="text-sm text-slate-700">{{ selectedTicket.description }}</p>
             </div>
 
             <!-- Admin reply (if any) -->
             @if (selectedTicket.adminReply) {
-              <div class="bg-amber-500/10 rounded-lg p-4 mb-3 border border-amber-500/20">
-                <p class="text-xs font-medium text-amber-300 mb-1">
+              <div class="bg-blue-500/10 rounded-lg p-4 mb-3 border border-blue-500/20">
+                <p class="text-xs font-medium text-blue-700 mb-1">
                   Support Agent
                   @if (selectedTicket.respondedAt) {
                     — {{ selectedTicket.respondedAt | date:'dd MMM, HH:mm' }}
                   }
                 </p>
-                <p class="text-zinc-200 text-sm">{{ selectedTicket.adminReply }}</p>
+                <p class="text-sm text-slate-700">{{ selectedTicket.adminReply }}</p>
               </div>
             } @else {
-              <p class="text-xs text-zinc-500 italic">Awaiting reply from our support team...</p>
+              <p class="text-xs italic text-slate-500">Awaiting reply from our support team...</p>
             }
           </div>
         }
@@ -90,22 +90,22 @@ import { SupportTicketDto } from '../../shared/models/support.model';
         @if (!selectedTicket) {
           @if (tickets.length === 0) {
             <!-- Empty state -->
-            <div class="text-center py-16 text-zinc-500">
+            <div class="py-16 text-center text-slate-500">
               <div class="text-5xl mb-3">🎫</div>
-              <p class="font-medium text-zinc-400">No tickets yet</p>
+              <p class="font-medium text-slate-600">No tickets yet</p>
               <p class="text-sm mt-1">Create one if you need help!</p>
             </div>
           } @else {
             <div class="space-y-3">
               @for (ticket of tickets; track ticket.id) {
                 <div
-                  class="bg-zinc-900 border border-zinc-800 rounded-xl shadow p-5 cursor-pointer hover:border-zinc-700 transition-colors"
+                  class="cursor-pointer rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-slate-300"
                   (click)="openTicket(ticket)"
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                      <p class="font-medium text-zinc-100 truncate">{{ ticket.subject }}</p>
-                      <p class="text-xs text-zinc-500 mt-0.5">
+                      <p class="truncate font-medium text-slate-900">{{ ticket.subject }}</p>
+                      <p class="mt-0.5 text-xs text-slate-500">
                         #{{ ticket.ticketNumber }} &bull; {{ ticket.category }} &bull;
                         {{ ticket.createdAt | date:'dd MMM yyyy' }}
                       </p>
@@ -116,7 +116,7 @@ import { SupportTicketDto } from '../../shared/models/support.model';
                         [class]="statusClass(ticket.status)"
                       >{{ ticket.status }}</span>
                       @if (ticket.adminReply) {
-                        <span class="text-xs text-zinc-500">1 reply</span>
+                        <span class="text-xs text-slate-500">1 reply</span>
                       }
                     </div>
                   </div>
@@ -131,20 +131,20 @@ import { SupportTicketDto } from '../../shared/models/support.model';
     <!-- ── Create Ticket Modal ── -->
     @if (showCreate) {
       <div class="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl shadow-xl w-full max-w-md p-6">
+        <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
           <div class="flex justify-between items-center mb-5">
-            <h3 class="text-lg font-bold text-zinc-100">New Support Ticket</h3>
-            <button (click)="closeCreate()" class="text-zinc-500 hover:text-zinc-300 text-2xl leading-none">&times;</button>
+            <h3 class="text-lg font-bold text-slate-900">New Support Ticket</h3>
+            <button (click)="closeCreate()" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
           </div>
 
           <form [formGroup]="createForm" (ngSubmit)="submitCreate()" novalidate class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Subject</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Subject</label>
               <input
                 type="text"
                 formControlName="subject"
                 placeholder="Briefly describe your issue"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 [class.border-red-500]="submitted && createForm.controls.subject.invalid"
               />
               @if (submitted && createForm.controls.subject.invalid) {
@@ -153,10 +153,10 @@ import { SupportTicketDto } from '../../shared/models/support.model';
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Category</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Category</label>
               <select
                 formControlName="category"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
               >
                 <option value="Payment">Payment</option>
                 <option value="Account">Account</option>
@@ -167,10 +167,10 @@ import { SupportTicketDto } from '../../shared/models/support.model';
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Priority</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Priority</label>
               <select
                 formControlName="priority"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
               >
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
@@ -180,12 +180,12 @@ import { SupportTicketDto } from '../../shared/models/support.model';
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Description</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
               <textarea
                 formControlName="description"
                 rows="4"
                 placeholder="Describe your issue in detail..."
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+                class="w-full resize-none rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 [class.border-red-500]="submitted && createForm.controls.description.invalid"
               ></textarea>
               @if (submitted && createForm.controls.description.invalid) {
@@ -197,7 +197,7 @@ import { SupportTicketDto } from '../../shared/models/support.model';
               <button
                 type="button"
                 (click)="closeCreate()"
-                class="flex-1 border border-zinc-700 text-zinc-300 font-semibold py-3 rounded-lg hover:bg-zinc-800"
+                class="flex-1 rounded-lg border border-slate-300 py-3 font-semibold text-slate-700 hover:bg-slate-100"
               >Cancel</button>
               <button
                 type="submit"
@@ -294,12 +294,12 @@ export class SupportComponent implements OnInit {
 
   statusClass(status: string): string {
     switch (status) {
-      case 'Open':       return 'bg-yellow-500/20 text-yellow-300';
-      case 'InProgress': return 'bg-amber-500/20 text-amber-300';
+      case 'Open':       return 'bg-blue-500/20 text-blue-700';
+      case 'InProgress': return 'bg-sky-500/20 text-sky-700';
       case 'Responded':  return 'bg-fuchsia-500/20 text-fuchsia-300';
-      case 'Resolved':   return 'bg-emerald-500/20 text-emerald-300';
-      case 'Closed':     return 'bg-zinc-700 text-zinc-300';
-      default:           return 'bg-zinc-700 text-zinc-300';
+      case 'Resolved':   return 'bg-emerald-500/20 text-emerald-700';
+      case 'Closed':     return 'bg-slate-200 text-slate-700';
+      default:           return 'bg-slate-200 text-slate-700';
     }
   }
 }

@@ -19,25 +19,25 @@ const CATEGORY_ICONS: Record<string, string> = {
   standalone: true,
   imports: [DecimalPipe, LoaderComponent],
   template: `
-    <div class="p-6 space-y-6 max-w-5xl mx-auto">
+    <div class="mx-auto max-w-5xl space-y-6 p-6 text-slate-900">
       <div>
-        <h1 class="text-2xl font-display font-bold text-zinc-100">Reward Catalog</h1>
-        <p class="text-zinc-400 text-sm mt-1">Redeem your points for exclusive rewards.</p>
+        <h1 class="text-2xl font-display font-bold text-slate-900">Reward Catalog</h1>
+        <p class="mt-1 text-sm text-slate-500">Redeem your points for exclusive rewards.</p>
       </div>
 
       <app-loader [show]="loading" />
 
       @if (!loading) {
         @if (lastRedemptionCode) {
-          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
-            <p class="text-xs uppercase tracking-wide text-emerald-300/90">Latest coupon code</p>
-            <p class="mt-1 font-mono text-lg font-semibold text-emerald-200">{{ lastRedemptionCode }}</p>
+          <div class="rounded-xl border border-emerald-300/70 bg-emerald-50 px-4 py-3">
+            <p class="text-xs uppercase tracking-wide text-emerald-700/90">Latest coupon code</p>
+            <p class="mt-1 font-mono text-lg font-semibold text-emerald-700">{{ lastRedemptionCode }}</p>
           </div>
         }
 
         @if (items.length === 0) {
-          <div class="text-center py-20 text-zinc-500">
-            <p class="font-medium text-zinc-400 text-lg">No catalog items yet</p>
+          <div class="py-20 text-center text-slate-500">
+            <p class="text-lg font-medium text-slate-600">No catalog items yet</p>
             <p class="text-sm mt-1">Check back soon, rewards are on the way.</p>
           </div>
         } @else {
@@ -48,9 +48,9 @@ const CATEGORY_ICONS: Record<string, string> = {
                 class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
                 [class.bg-accent]="selectedCategory === null"
                 [class.text-white]="selectedCategory === null"
-                [class.bg-zinc-800]="selectedCategory !== null"
-                [class.text-zinc-400]="selectedCategory !== null"
-                [class.hover:bg-zinc-700]="selectedCategory !== null"
+                [class.bg-slate-100]="selectedCategory !== null"
+                [class.text-slate-600]="selectedCategory !== null"
+                [class.hover:bg-slate-200]="selectedCategory !== null"
               >All</button>
               @for (cat of categories; track cat) {
                 <button
@@ -58,8 +58,8 @@ const CATEGORY_ICONS: Record<string, string> = {
                   class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
                   [class.bg-accent]="selectedCategory === cat"
                   [class.text-white]="selectedCategory === cat"
-                  [class.bg-zinc-800]="selectedCategory !== cat"
-                  [class.text-zinc-400]="selectedCategory !== cat"
+                  [class.bg-slate-100]="selectedCategory !== cat"
+                  [class.text-slate-600]="selectedCategory !== cat"
                 >{{ categoryIcon(cat) }} {{ cat }}</button>
               }
             </div>
@@ -67,24 +67,24 @@ const CATEGORY_ICONS: Record<string, string> = {
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             @for (item of filteredItems; track item.id) {
-              <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 flex flex-col gap-3 hover:border-zinc-700 transition-colors">
+              <div class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white/95 p-5 shadow-sm transition-colors hover:border-slate-300">
                 <div class="flex items-start justify-between gap-2">
-                  <div class="text-sm text-zinc-400 font-semibold">{{ categoryIcon(item.category) }}</div>
-                  <span class="px-2 py-0.5 bg-zinc-700 text-zinc-300 rounded-full text-xs shrink-0">{{ item.category }}</span>
+                  <div class="text-sm font-semibold text-slate-500">{{ categoryIcon(item.category) }}</div>
+                  <span class="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{{ item.category }}</span>
                 </div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-zinc-100 text-sm">{{ item.name }}</h3>
+                  <h3 class="text-sm font-semibold text-slate-900">{{ item.name }}</h3>
                   @if (item.description) {
-                    <p class="text-zinc-500 text-xs mt-1 line-clamp-2">{{ item.description }}</p>
+                    <p class="mt-1 line-clamp-2 text-xs text-slate-500">{{ item.description }}</p>
                   }
                 </div>
-                <div class="flex items-center justify-between mt-auto pt-3 border-t border-zinc-800">
+                <div class="mt-auto flex items-center justify-between border-t border-slate-200 pt-3">
                   <div>
-                    <p class="text-xs text-zinc-500">Points required</p>
-                    <p class="text-amber-300 font-bold text-lg">{{ item.pointsCost | number }}</p>
+                    <p class="text-xs text-slate-500">Points required</p>
+                    <p class="text-lg font-bold text-blue-600">{{ item.pointsCost | number }}</p>
                   </div>
                   <button
-                    class="px-4 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg text-sm font-medium transition-colors border border-accent/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="rounded-lg border border-accent/30 bg-accent/10 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
                     [disabled]="redeemingId === item.id"
                     (click)="redeem(item)"
                   >{{ redeemingId === item.id ? 'Redeeming...' : 'Redeem' }}</button>
@@ -93,7 +93,7 @@ const CATEGORY_ICONS: Record<string, string> = {
             }
           </div>
 
-          <p class="text-zinc-600 text-xs text-center">Redeem rewards instantly. Coupon codes are shown after successful redemption.</p>
+          <p class="text-center text-xs text-slate-500">Redeem rewards instantly. Coupon codes are shown after successful redemption.</p>
         }
       }
     </div>

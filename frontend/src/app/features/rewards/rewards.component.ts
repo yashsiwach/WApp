@@ -17,34 +17,34 @@ const TIER_THRESHOLDS: Record<string, number> = {
   standalone: true,
   imports: [DatePipe, DecimalPipe, LoaderComponent],
   template: `
-    <div class="p-6 space-y-6 max-w-5xl mx-auto">
-      <h1 class="text-2xl font-display font-bold text-zinc-100">Rewards</h1>
+    <div class="mx-auto max-w-5xl space-y-6 p-6 text-slate-900">
+      <h1 class="text-2xl font-display font-bold text-slate-900">Rewards</h1>
 
-      <div class="rounded-xl p-6 text-white shadow-lg" [class]="tierBg">
+      <div class="rounded-xl border border-slate-200 p-6 text-slate-900 shadow-sm" [class]="tierBg">
         <app-loader [show]="loadingAccount" />
         @if (!loadingAccount && rewards) {
           <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
             <div>
-              <p class="text-sm opacity-80 mb-1">Points Balance</p>
+              <p class="mb-1 text-sm text-slate-500">Points Balance</p>
               <p class="text-4xl font-bold">{{ rewards.pointsBalance | number }}</p>
-              <p class="text-sm opacity-70 mt-1">Lifetime Earned: {{ rewards.totalEarned | number }} pts</p>
+              <p class="mt-1 text-sm text-slate-500">Lifetime Earned: {{ rewards.totalEarned | number }} pts</p>
             </div>
             <div class="flex flex-col items-start sm:items-end gap-3">
-              <span class="px-4 py-1.5 rounded-full text-sm font-bold" [class]="tierBadgeClass">
+              <span class="rounded-full px-4 py-1.5 text-sm font-bold" [class]="tierBadgeClass">
                 {{ rewards.tier }} Tier
               </span>
-              <p class="text-sm opacity-80 font-semibold">Keep earning points to move up tiers.</p>
+              <p class="text-sm font-semibold text-slate-600">Keep earning points to move up tiers.</p>
             </div>
           </div>
 
           <div class="mt-5">
-            <div class="flex justify-between text-xs opacity-70 mb-1">
+            <div class="mb-1 flex justify-between text-xs text-slate-500">
               <span>{{ rewards.tier }}</span>
               <span>{{ rewards.pointsBalance | number }} pts</span>
             </div>
-            <div class="w-full bg-black/20 rounded-full h-2.5">
+            <div class="h-2.5 w-full rounded-full bg-slate-200">
               <div
-                class="bg-white/80 h-2.5 rounded-full transition-all duration-500"
+                class="h-2.5 rounded-full bg-accent transition-all duration-500"
                 [style.width.%]="tierProgress"
               ></div>
             </div>
@@ -52,12 +52,12 @@ const TIER_THRESHOLDS: Record<string, number> = {
         }
       </div>
 
-      <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl shadow p-6">
-        <h2 class="text-lg font-semibold text-zinc-100 mb-4">Points History</h2>
+      <div class="rounded-xl border border-slate-200 bg-white/95 p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-semibold text-slate-900">Points History</h2>
         <app-loader [show]="loadingHistory" />
         @if (!loadingHistory) {
           @if (history.length === 0) {
-            <div class="text-center py-12 text-zinc-500">
+            <div class="py-12 text-center text-slate-500">
               <div class="text-4xl mb-2">Points</div>
               <p>No points earned yet. Make a transfer to earn points.</p>
             </div>
@@ -65,17 +65,17 @@ const TIER_THRESHOLDS: Record<string, number> = {
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="border-b border-zinc-700 text-zinc-400 text-left">
+                  <tr class="border-b border-slate-200 text-left text-slate-500">
                     <th class="pb-3 font-medium">Date</th>
                     <th class="pb-3 font-medium">Points</th>
                     <th class="pb-3 font-medium">Reason</th>
                     <th class="pb-3 font-medium">Reference</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800">
+                <tbody class="divide-y divide-slate-100">
                   @for (tx of history; track tx.id) {
-                    <tr class="hover:bg-zinc-800/50">
-                      <td class="py-3 text-zinc-400 text-xs">{{ tx.createdAt | date:'dd MMM, HH:mm' }}</td>
+                    <tr class="hover:bg-slate-100/80">
+                      <td class="py-3 text-xs text-slate-500">{{ tx.createdAt | date:'dd MMM, HH:mm' }}</td>
                       <td
                         class="py-3 font-semibold"
                         [class.text-emerald-400]="tx.points >= 0"
@@ -83,8 +83,8 @@ const TIER_THRESHOLDS: Record<string, number> = {
                       >
                         {{ tx.points > 0 ? '+' : '' }}{{ tx.points | number }}
                       </td>
-                      <td class="py-3 text-zinc-300">{{ tx.reason }}</td>
-                      <td class="py-3 text-zinc-500 text-xs font-mono">{{ tx.reference }}</td>
+                      <td class="py-3 text-slate-700">{{ tx.reason }}</td>
+                      <td class="py-3 text-xs font-mono text-slate-500">{{ tx.reference }}</td>
                     </tr>
                   }
                 </tbody>
@@ -134,23 +134,23 @@ export class RewardsComponent implements OnInit {
   get tierBg(): string {
     const tier = this.rewards?.tier?.toLowerCase() ?? '';
     const map: Record<string, string> = {
-      bronze: 'bg-gradient-to-br from-amber-700 to-amber-500',
-      silver: 'bg-gradient-to-br from-slate-500 to-slate-400',
-      gold: 'bg-gradient-to-br from-yellow-600 to-yellow-400',
-      platinum: 'bg-gradient-to-br from-slate-400 to-slate-300',
+      bronze: 'bg-gradient-to-br from-blue-50 to-blue-100/80',
+      silver: 'bg-gradient-to-br from-slate-50 to-slate-100',
+      gold: 'bg-gradient-to-br from-cyan-50 to-cyan-100/80',
+      platinum: 'bg-gradient-to-br from-cyan-50 to-sky-100/70',
     };
-    return map[tier] ?? 'bg-gradient-to-br from-zinc-800 to-zinc-700';
+    return map[tier] ?? 'bg-gradient-to-br from-slate-50 to-slate-100';
   }
 
   get tierBadgeClass(): string {
     const tier = this.rewards?.tier?.toLowerCase() ?? '';
     const map: Record<string, string> = {
-      bronze: 'bg-amber-900/30 text-amber-100',
-      silver: 'bg-slate-700/30 text-slate-100',
-      gold: 'bg-yellow-800/30 text-yellow-100',
-      platinum: 'bg-slate-600/30 text-slate-100',
+      bronze: 'bg-blue-200/70 text-blue-800',
+      silver: 'bg-slate-200/70 text-slate-700',
+      gold: 'bg-cyan-200/80 text-cyan-800',
+      platinum: 'bg-cyan-200/80 text-cyan-800',
     };
-    return map[tier] ?? 'bg-zinc-700 text-zinc-100';
+    return map[tier] ?? 'bg-slate-200 text-slate-700';
   }
 
   get tierProgress(): number {

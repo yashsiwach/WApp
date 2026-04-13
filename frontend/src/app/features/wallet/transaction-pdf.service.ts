@@ -5,7 +5,7 @@ import autoTable from 'jspdf-autotable';
 import { TransactionResponse, WalletResponse } from '../../shared/models/wallet.model';
 
 function formatInr(amount: number): string {
-  return '₹' + new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+  return 'Rs. ' + new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
 }
 
 function formatDate(dateStr: string): string {
@@ -28,7 +28,7 @@ export class TransactionPdfService {
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
-    doc.setTextColor(250, 204, 21);         // amber-400
+    doc.setTextColor(37, 99, 235);          // blue-600
     doc.text('Digital Wallet', 14, 15);
 
     doc.setFont('helvetica', 'normal');
@@ -115,8 +115,8 @@ export class TransactionPdfService {
       },
       columnStyles: {
         0: { cellWidth: 38 },
-        1: { cellWidth: 16, halign: 'center' },
-        2: { cellWidth: 30 },
+        1: { cellWidth: 20, halign: 'center' },
+        2: { cellWidth: 26 },
         3: { cellWidth: 26, halign: 'right', fontStyle: 'bold' },
         4: { cellWidth: 'auto' },
       },

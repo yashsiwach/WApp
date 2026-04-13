@@ -1,11 +1,20 @@
 using AuthService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace AuthService.Infrastructure.Data;
 
 public class AuthDbContext : DbContext
 {
     public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
+
+    // Suppress: "KYCDocument/RefreshToken has a required navigation to User which has a
+    // global query filter (soft-delete). Rows referencing a soft-deleted User will have
+    // a null navigation even though the FK is non-nullable."
+    // This is acceptable in our design — queries that need deleted users use IgnoreQueryFilters().
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.ConfigureWarnings(w =>
+            w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
 
     public DbSet<User> Users => Set<User>();
     public DbSet<OTPLog> OTPLogs => Set<OTPLog>();

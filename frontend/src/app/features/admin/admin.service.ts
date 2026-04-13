@@ -3,16 +3,29 @@ import { Observable, map } from 'rxjs';
 
 import { ApiService } from '../../core/services/api.service';
 import {
+  AdminDashboardStatsDto,
   CatalogAdminItemDto,
   CreateCatalogItemRequest,
   KycActionRequest,
   KycReviewDto,
+  NotificationTemplateDto,
   TicketDetailDto,
   TicketSummaryDto,
+  UpdateCatalogItemRequest,
+  UpdateNotificationTemplateRequest,
+  WalletAdminStatsDto,
 } from '../../shared/models/admin.model';
 import { UserDto } from '../../shared/models/auth.model';
 import { CatalogItemDto } from '../../shared/models/catalog.model';
 import { PaginatedResult } from '../../shared/models/paginated-result.model';
+
+interface TicketQueryParams {
+  status?: string;
+  priority?: string;
+  category?: string;
+  page?: number;
+  size?: number;
+}
 
 interface AdminKycApiDto {
   id: string;
@@ -149,6 +162,60 @@ export class AdminService {
           isActive: item.isAvailable,
         })),
       );
+  }
+
+  updateCatalogItem(itemId: string, payload: UpdateCatalogItemRequest): Observable<CatalogAdminItemDto> {
+    return this.api
+      .put<AdminCatalogApiDto>(`/api/admin/rewards/catalog/${itemId}`, {
+        name: payload.name,
+        description: payload.description,
+        pointsCost: payload.pointsCost,
+        category: payload.category,
+        isAvailable: payload.isActive,
+      })
+      .pipe(
+        map((item) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          pointsCost: item.pointsCost,
+          category: item.category,
+          isActive: item.isAvailable,
+        })),
+      );
+  }
+
+  deleteCatalogItem(itemId: string): Observable<null> {
+    return this.api.delete<null>(`/api/admin/rewards/catalog/${itemId}`);
+  }
+
+  getDashboardStats(): Observable<AdminDashboardStatsDto> {
+    return this.api.get<AdminDashboardStatsDto>('/api/admin/dashboard');
+  }
+
+  getTicketsPaginated(params: TicketQueryParams): Observable<PaginatedResult<TicketSummaryDto>> {
+    return this.api.get<PaginatedResult<TicketSummaryDto>>('/api/support/admin/tickets', {
+      ...(params.status   ? { status:   params.status }   : {}),
+      ...(params.priority ? { priority: params.priority } : {}),
+      ...(params.category ? { category: params.category } : {}),
+      page: params.page ?? 1,
+      size: params.size ?? 20,
+    });
+  }
+
+  getWalletStats(): Observable<WalletAdminStatsDto> {
+    return this.api.get<WalletAdminStatsDto>('/api/admin/wallet/stats');
+  }
+
+  getNotificationTemplates(): Observable<NotificationTemplateDto[]> {
+    return this.api.get<NotificationTemplateDto[]>('/api/notifications/templates');
+  }
+
+  updateNotificationTemplate(
+    id: string,
+    payload: UpdateNotificationTemplateRequest,
+  ): Observable<NotificationTemplateDto> {
+    return this.api.put<NotificationTemplateDto>(`/api/notifications/templates/${id}`, payload);
   }
 
   private mapKycReview(item: AdminKycApiDto): KycReviewDto {

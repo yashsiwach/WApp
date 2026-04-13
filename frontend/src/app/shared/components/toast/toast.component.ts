@@ -14,7 +14,7 @@ import { Toast, ToastService } from '../../services/toast.service';
           [ngClass]="{
             'bg-emerald-600/95 border-emerald-500': toast.type === 'success',
             'bg-rose-600/95 border-rose-500': toast.type === 'error',
-            'bg-amber-600/95 border-amber-500': toast.type === 'info'
+            'bg-blue-600/95 border-blue-500': toast.type === 'info'
           }"
         >
           <span>{{ toast.message }}</span>

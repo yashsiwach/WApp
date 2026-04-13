@@ -142,9 +142,16 @@ app.MapControllers();
 // ── Auto-migrate (dev) ──
 if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
-    db.Database.EnsureCreated();
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+        db.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "Development database migration failed. NotificationService will continue running.");
+    }
 }
 
 app.Run();

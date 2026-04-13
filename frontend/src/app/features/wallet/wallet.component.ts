@@ -22,25 +22,25 @@ import {
   standalone: true,
   imports: [AsyncPipe, DatePipe, SlicePipe, ReactiveFormsModule, LoaderComponent, InrCurrencyPipe],
   template: `
-    <div class="p-6 space-y-6 max-w-5xl mx-auto">
-      <h1 class="text-2xl font-display font-bold text-zinc-100">My Wallet</h1>
+    <div class="mx-auto max-w-5xl space-y-6 p-6 text-slate-900">
+      <h1 class="text-2xl font-display font-bold text-slate-900">My Wallet</h1>
 
-      <div class="bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 rounded-xl p-6 text-white shadow-lg border border-zinc-700">
+      <div class="rounded-xl border border-slate-200 bg-gradient-to-br from-white via-white to-teal-50/60 p-6 text-slate-900 shadow-sm">
         @if (wallet$ | async; as wallet) {
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p class="text-zinc-400 text-sm mb-1">Available Balance</p>
+              <p class="mb-1 text-sm text-slate-500">Available Balance</p>
               <p class="text-4xl font-bold">{{ wallet.balance | inrCurrency }}</p>
-              <p class="text-zinc-400 text-sm mt-1">{{ wallet.currency }} | Wallet ID: {{ wallet.walletId | slice:0:8 }}...</p>
+              <p class="mt-1 text-sm text-slate-500">{{ wallet.currency }} | Wallet ID: {{ wallet.walletId | slice:0:8 }}...</p>
             </div>
             <div class="flex gap-2 flex-wrap">
               @if (wallet.isLocked) {
-                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-600">Locked</span>
+                <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Locked</span>
               } @else {
-                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-700">Active</span>
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Active</span>
               }
               @if (wallet.kycVerified) {
-                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-800">KYC Verified</span>
+                <span class="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700">KYC Verified</span>
               }
             </div>
           </div>
@@ -56,7 +56,7 @@ import {
             <button
               (click)="showTransfer = true"
               [disabled]="wallet.isLocked"
-              class="flex-1 bg-zinc-700 hover:bg-zinc-600 text-white font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex-1 rounded-lg border border-slate-300 bg-slate-100 py-2.5 font-semibold text-slate-700 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Transfer
             </button>
@@ -69,14 +69,14 @@ import {
         }
       </div>
 
-      <div class="bg-zinc-900/80 rounded-xl shadow p-6 border border-zinc-800">
+      <div class="rounded-xl border border-slate-200 bg-white/95 p-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-zinc-100">Transaction History</h2>
+          <h2 class="text-lg font-semibold text-slate-900">Transaction History</h2>
           <div class="flex items-center gap-2">
             <button
               (click)="downloadCsv()"
               [disabled]="csvLoading"
-              class="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-zinc-100 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
             >
               @if (csvLoading) {
                 <span class="w-3.5 h-3.5 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin"></span>
@@ -88,7 +88,7 @@ import {
             <button
               (click)="downloadPdf()"
               [disabled]="pdfLoading"
-              class="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-zinc-100 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
             >
               @if (pdfLoading) {
                 <span class="w-3.5 h-3.5 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin"></span>
@@ -107,7 +107,7 @@ import {
 
         @if (!loadingTx) {
           @if (transactions.length === 0) {
-            <div class="text-center py-12 text-zinc-500">
+            <div class="py-12 text-center text-slate-500">
               <div class="text-5xl mb-3">Ledger</div>
               <p>No transactions yet</p>
             </div>
@@ -115,7 +115,7 @@ import {
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="border-b border-zinc-700 text-zinc-400 text-left">
+                  <tr class="border-b border-slate-200 text-left text-slate-500">
                     <th class="pb-3 font-medium">Date</th>
                     <th class="pb-3 font-medium">Type</th>
                     <th class="pb-3 font-medium">Amount</th>
@@ -123,13 +123,13 @@ import {
                     <th class="pb-3 font-medium">Description</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800">
+                <tbody class="divide-y divide-slate-100">
                   @for (tx of transactions; track tx.id) {
                     <tr
                       (click)="openTransactionDetails(tx)"
-                      class="hover:bg-zinc-800/70 cursor-pointer transition-colors"
+                      class="cursor-pointer transition-colors hover:bg-slate-100/80"
                     >
-                      <td class="py-3 text-zinc-400 text-xs">{{ tx.createdAt | date:'dd MMM, HH:mm' }}</td>
+                      <td class="py-3 text-xs text-slate-500">{{ tx.createdAt | date:'dd MMM, HH:mm' }}</td>
                       <td class="py-3">
                         <span
                           class="px-2 py-0.5 rounded-full text-xs font-semibold"
@@ -142,8 +142,8 @@ import {
                         >{{ tx.referenceType }}</span>
                       </td>
                       <td class="py-3 font-semibold">{{ tx.amount | inrCurrency }}</td>
-                      <td class="py-3 text-zinc-400 text-xs">{{ tx.referenceType }}</td>
-                      <td class="py-3 text-zinc-300 text-xs max-w-48 truncate">{{ tx.description || '-' }}</td>
+                      <td class="py-3 text-xs text-slate-500">{{ tx.referenceType }}</td>
+                      <td class="max-w-48 truncate py-3 text-xs text-slate-700">{{ tx.description || '-' }}</td>
                     </tr>
                   }
                 </tbody>
@@ -151,17 +151,17 @@ import {
             </div>
 
             <div class="flex items-center justify-between mt-4 text-sm">
-              <span class="text-zinc-400">Page {{ txPage }} of {{ txTotalPages }}</span>
+              <span class="text-slate-500">Page {{ txPage }} of {{ txTotalPages }}</span>
               <div class="flex gap-2">
                 <button
                   (click)="prevPage()"
                   [disabled]="txPage === 1"
-                  class="px-3 py-1.5 border border-zinc-700 rounded-lg hover:bg-zinc-800 disabled:opacity-40"
+                  class="rounded-lg border border-slate-300 px-3 py-1.5 hover:bg-slate-100 disabled:opacity-40"
                 >Prev</button>
                 <button
                   (click)="nextPage()"
                   [disabled]="txPage >= txTotalPages"
-                  class="px-3 py-1.5 border border-zinc-700 rounded-lg hover:bg-zinc-800 disabled:opacity-40"
+                  class="rounded-lg border border-slate-300 px-3 py-1.5 hover:bg-slate-100 disabled:opacity-40"
                 >Next</button>
               </div>
             </div>
@@ -169,13 +169,13 @@ import {
         }
       </div>
 
-      <div class="bg-zinc-900/80 rounded-xl shadow p-6 border border-zinc-800">
-        <h2 class="text-lg font-semibold text-zinc-100 mb-4">Top-Up Payment History</h2>
+      <div class="rounded-xl border border-slate-200 bg-white/95 p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-semibold text-slate-900">Top-Up Payment History</h2>
         <app-loader [show]="loadingPayments" />
 
         @if (!loadingPayments) {
           @if (payments.length === 0) {
-            <div class="text-center py-8 text-zinc-500">
+            <div class="py-8 text-center text-slate-500">
               <div class="text-4xl mb-2">Top Ups</div>
               <p>No top-up records yet</p>
             </div>
@@ -183,7 +183,7 @@ import {
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="border-b border-zinc-700 text-zinc-400 text-left">
+                  <tr class="border-b border-slate-200 text-left text-slate-500">
                     <th class="pb-3 font-medium">Date</th>
                     <th class="pb-3 font-medium">Amount</th>
                     <th class="pb-3 font-medium">Status</th>
@@ -191,14 +191,14 @@ import {
                     <th class="pb-3 font-medium">Description</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-zinc-800">
+                <tbody class="divide-y divide-slate-100">
                   @for (p of payments; track p.id) {
-                    <tr class="hover:bg-zinc-800/70">
-                      <td class="py-3 text-zinc-400 text-xs">{{ p.createdAt | date:'dd MMM, HH:mm' }}</td>
+                    <tr class="hover:bg-slate-100/80">
+                      <td class="py-3 text-xs text-slate-500">{{ p.createdAt | date:'dd MMM, HH:mm' }}</td>
                       <td class="py-3 font-semibold text-green-400">{{ p.amount | inrCurrency }}</td>
                       <td class="py-3"><span class="px-2 py-0.5 rounded-full text-xs text-emerald-300">{{ p.status }}</span></td>
-                      <td class="py-3 text-zinc-400 text-xs font-mono">{{ p.referenceType }}</td>
-                      <td class="py-3 text-zinc-300 text-xs">{{ p.description || '-' }}</td>
+                      <td class="py-3 text-xs font-mono text-slate-500">{{ p.referenceType }}</td>
+                      <td class="py-3 text-xs text-slate-700">{{ p.description || '-' }}</td>
                     </tr>
                   }
                 </tbody>
@@ -211,62 +211,62 @@ import {
 
     @if (selectedTransaction) {
       <div class="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 rounded-2xl shadow-xl w-full max-w-lg p-6 border border-zinc-700">
+        <div class="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
           <div class="flex justify-between items-center mb-5">
             <div>
-              <h3 class="text-lg font-bold text-zinc-100">Transaction Details</h3>
-              <p class="text-sm text-zinc-400">Full record for the selected wallet entry.</p>
+              <h3 class="text-lg font-bold text-slate-900">Transaction Details</h3>
+              <p class="text-sm text-slate-500">Full record for the selected wallet entry.</p>
             </div>
-            <button (click)="closeTransactionDetails()" class="text-zinc-500 hover:text-zinc-300 text-2xl leading-none">&times;</button>
+            <button (click)="closeTransactionDetails()" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 sm:col-span-2">
-              <p class="text-zinc-500 text-xs mb-1">Transaction ID</p>
-              <p class="text-zinc-100 font-mono break-all">{{ selectedTransaction.id }}</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+              <p class="mb-1 text-xs text-slate-500">Transaction ID</p>
+              <p class="font-mono break-all text-slate-900">{{ selectedTransaction.id }}</p>
             </div>
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
-              <p class="text-zinc-500 text-xs mb-1">Date & Time</p>
-              <p class="text-zinc-100">{{ selectedTransaction.createdAt | date:'dd MMM yyyy, HH:mm:ss' }}</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p class="mb-1 text-xs text-slate-500">Date & Time</p>
+              <p class="text-slate-900">{{ selectedTransaction.createdAt | date:'dd MMM yyyy, HH:mm:ss' }}</p>
             </div>
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
-              <p class="text-zinc-500 text-xs mb-1">Status</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p class="mb-1 text-xs text-slate-500">Status</p>
               <span
                 class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold"
                 [class.bg-emerald-500/20]="selectedTransaction.status === 'Completed' || selectedTransaction.status === 'Success'"
-                [class.text-emerald-300]="selectedTransaction.status === 'Completed' || selectedTransaction.status === 'Success'"
-                [class.bg-yellow-500/20]="selectedTransaction.status === 'Pending'"
-                [class.text-yellow-300]="selectedTransaction.status === 'Pending'"
+                [class.text-emerald-700]="selectedTransaction.status === 'Completed' || selectedTransaction.status === 'Success'"
+                [class.bg-blue-500/20]="selectedTransaction.status === 'Pending'"
+                [class.text-blue-700]="selectedTransaction.status === 'Pending'"
                 [class.bg-rose-500/20]="selectedTransaction.status === 'Failed'"
-                [class.text-rose-300]="selectedTransaction.status === 'Failed'"
+                [class.text-rose-700]="selectedTransaction.status === 'Failed'"
               >{{ selectedTransaction.status }}</span>
             </div>
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
-              <p class="text-zinc-500 text-xs mb-1">Type</p>
-              <p class="text-zinc-100">{{ selectedTransaction.type }}</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p class="mb-1 text-xs text-slate-500">Type</p>
+              <p class="text-slate-900">{{ selectedTransaction.type }}</p>
             </div>
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
-              <p class="text-zinc-500 text-xs mb-1">Amount</p>
-              <p class="text-zinc-100 font-semibold">{{ selectedTransaction.amount | inrCurrency }}</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p class="mb-1 text-xs text-slate-500">Amount</p>
+              <p class="font-semibold text-slate-900">{{ selectedTransaction.amount | inrCurrency }}</p>
             </div>
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
-              <p class="text-zinc-500 text-xs mb-1">Reference Type</p>
-              <p class="text-zinc-100">{{ selectedTransaction.referenceType }}</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p class="mb-1 text-xs text-slate-500">Reference Type</p>
+              <p class="text-slate-900">{{ selectedTransaction.referenceType }}</p>
             </div>
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
-              <p class="text-zinc-500 text-xs mb-1">Reference ID</p>
-              <p class="text-zinc-100 font-mono break-all">{{ selectedTransaction.referenceId }}</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p class="mb-1 text-xs text-slate-500">Reference ID</p>
+              <p class="font-mono break-all text-slate-900">{{ selectedTransaction.referenceId }}</p>
             </div>
 
-            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 sm:col-span-2">
-              <p class="text-zinc-500 text-xs mb-1">Description</p>
-              <p class="text-zinc-100">{{ selectedTransaction.description || '-' }}</p>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+              <p class="mb-1 text-xs text-slate-500">Description</p>
+              <p class="text-slate-900">{{ selectedTransaction.description || '-' }}</p>
             </div>
           </div>
 
@@ -274,7 +274,7 @@ import {
             <button
               type="button"
               (click)="closeTransactionDetails()"
-              class="px-4 py-2 border border-zinc-700 text-zinc-300 font-semibold rounded-lg hover:bg-zinc-800"
+              class="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-100"
             >Close</button>
           </div>
         </div>
@@ -283,21 +283,21 @@ import {
 
     @if (showTopUp) {
       <div class="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-zinc-700">
+        <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
           <div class="flex justify-between items-center mb-5">
-            <h3 class="text-lg font-bold text-zinc-100">Top Up Wallet</h3>
-            <button (click)="showTopUp = false" class="text-zinc-500 hover:text-zinc-300 text-2xl leading-none">&times;</button>
+            <h3 class="text-lg font-bold text-slate-900">Top Up Wallet</h3>
+            <button (click)="showTopUp = false" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
           </div>
 
           <form [formGroup]="topUpForm" (ngSubmit)="submitTopUp()" novalidate class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Amount (INR)</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Amount (INR)</label>
               <input
                 type="number"
                 formControlName="amount"
                 min="1"
                 max="100000"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 [class.border-red-500]="topUpSubmitted && topUpForm.controls.amount.invalid"
               />
               @if (topUpSubmitted && topUpForm.controls.amount.invalid) {
@@ -308,7 +308,7 @@ import {
               <button
                 type="button"
                 (click)="showTopUp = false"
-                class="flex-1 border border-zinc-700 text-zinc-300 font-semibold py-3 rounded-lg hover:bg-zinc-800"
+                class="flex-1 rounded-lg border border-slate-300 py-3 font-semibold text-slate-700 hover:bg-slate-100"
               >Cancel</button>
               <button
                 type="submit"
@@ -323,20 +323,20 @@ import {
 
     @if (showTransfer) {
       <div class="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 rounded-2xl shadow-xl w-full max-w-md p-6 border border-zinc-700">
+        <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
           <div class="flex justify-between items-center mb-5">
-            <h3 class="text-lg font-bold text-zinc-100">Transfer Money</h3>
-            <button (click)="showTransfer = false" class="text-zinc-500 hover:text-zinc-300 text-2xl leading-none">&times;</button>
+            <h3 class="text-lg font-bold text-slate-900">Transfer Money</h3>
+            <button (click)="showTransfer = false" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
           </div>
 
           <form [formGroup]="transferForm" (ngSubmit)="submitTransfer()" novalidate class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Recipient Email</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Recipient Email</label>
               <input
                 type="email"
                 formControlName="toEmail"
                 placeholder="recipient@example.com"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 [class.border-red-500]="txSubmitted && transferForm.controls.toEmail.invalid"
               />
               @if (txSubmitted && transferForm.controls.toEmail.errors?.['required']) {
@@ -347,13 +347,13 @@ import {
               }
             </div>
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Amount (INR)</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Amount (INR)</label>
               <input
                 type="number"
                 formControlName="amount"
                 min="1"
                 max="100000"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 [class.border-red-500]="txSubmitted && transferForm.controls.amount.invalid"
               />
               @if (txSubmitted && transferForm.controls.amount.invalid) {
@@ -361,24 +361,24 @@ import {
               }
             </div>
             <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1">Description (optional)</label>
+              <label class="mb-1 block text-sm font-medium text-slate-700">Description (optional)</label>
               <input
                 type="text"
                 formControlName="note"
                 placeholder="e.g. Lunch split"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-lg text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent"
+                class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </div>
             <div class="flex gap-3 pt-2">
               <button
                 type="button"
                 (click)="showTransfer = false"
-                class="flex-1 border border-zinc-700 text-zinc-300 font-semibold py-3 rounded-lg hover:bg-zinc-800"
+                class="flex-1 rounded-lg border border-slate-300 py-3 font-semibold text-slate-700 hover:bg-slate-100"
               >Cancel</button>
               <button
                 type="submit"
                 [disabled]="txLoading"
-                class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg disabled:opacity-60"
+                class="flex-1 rounded-lg bg-accent py-3 font-semibold text-white hover:bg-accent-hover disabled:opacity-60"
               >{{ txLoading ? 'Sending...' : 'Send Money' }}</button>
             </div>
           </form>

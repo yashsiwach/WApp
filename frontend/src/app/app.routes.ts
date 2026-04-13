@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
+
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { adminRedirectGuard } from './core/guards/admin-redirect.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -16,7 +18,7 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminRedirectGuard],
     loadComponent: () =>
       import('./features/layout/layout.component').then((m) => m.LayoutComponent),
     children: [
@@ -63,8 +65,8 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
-    loadComponent: () =>
-      import('./features/admin/admin.component').then((m) => m.AdminComponent),
+    loadChildren: () =>
+      import('./features/admin/admin.routes').then((m) => m.adminRoutes),
   },
   { path: '**', redirectTo: 'dashboard' },
 ];
