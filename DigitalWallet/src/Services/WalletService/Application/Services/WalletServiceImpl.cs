@@ -39,7 +39,7 @@ public class WalletServiceImpl : IWalletQueryService, IWalletCommandService
     /// <summary>Returns current wallet balance details for the given user.</summary>
     public async Task<BalanceResponse> GetBalanceAsync(Guid userId)
     {
-        var wallet = await GetWalletOrThrow(userId);
+        var wallet = await GetWalletOrThrow(userId);//EOD
         return WalletMapper.ToBalanceResponse(wallet);
     }
 
@@ -48,7 +48,7 @@ public class WalletServiceImpl : IWalletQueryService, IWalletCommandService
     /// <summary>Processes a wallet top-up with idempotency and daily limit checks, persists ledger changes, and publishes completion or failure events.</summary>
     public async Task<TopUpResponseDto> TopUpAsync(Guid userId, TopUpRequestDto request)
     {
-        var wallet = await GetWalletOrThrow(userId);
+        var wallet = await GetWalletOrThrow(userId);//EOD
 
         if (wallet.IsLocked)
             throw new InvalidOperationException("Wallet is locked. Contact support.");
@@ -60,7 +60,7 @@ public class WalletServiceImpl : IWalletQueryService, IWalletCommandService
         await using var tx = await _uow.BeginTransactionAsync();
         try
         {
-            var tracker = await GetOrCreateDailyTracker(wallet.Id);
+            var tracker = await GetOrCreateDailyTracker(wallet.Id);//EOD
             if (tracker.TopUpTotal + request.Amount > _limits.DailyTopUpLimit)
                 throw new InvalidOperationException($"Daily top-up limit of â‚¹{_limits.DailyTopUpLimit:N2} would be exceeded.");
 

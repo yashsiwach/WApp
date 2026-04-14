@@ -6,6 +6,9 @@ namespace RewardsService.Application.Mappers;
 /// <summary>Single responsibility: maps RewardsService domain objects to DTOs.</summary>
 public static class RewardsMapper
 {
+    /// <summary>
+    /// Maps a RewardsAccount entity to its DTO representation.
+    /// </summary>
     public static RewardsAccountDto ToDto(RewardsAccount account) => new()
     {
         Id             = account.Id,
@@ -14,6 +17,9 @@ public static class RewardsMapper
         LifetimePoints = account.LifetimePoints
     };
 
+    /// <summary>
+    /// Maps a Redemption entity and the associated item name to its DTO representation.
+    /// </summary>
     public static RedemptionDto ToDto(Redemption redemption, string itemName) => new()
     {
         Id              = redemption.Id,
@@ -24,6 +30,9 @@ public static class RewardsMapper
         CreatedAt       = redemption.CreatedAt
     };
 
+    /// <summary>
+    /// Maps a completed Redemption entity and remaining balance to a redeem response DTO.
+    /// </summary>
     public static RedeemResponseDto ToRedeemResponse(Redemption redemption, int remainingBalance) => new()
     {
         RedemptionId     = redemption.Id,
@@ -33,6 +42,9 @@ public static class RewardsMapper
         FulfillmentCode  = redemption.FulfillmentCode
     };
 
+    /// <summary>
+    /// Maps a RewardsCatalogItem entity to its DTO representation.
+    /// </summary>
     public static CatalogItemDto ToDto(RewardsCatalogItem item) => new()
     {
         Id            = item.Id,

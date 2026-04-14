@@ -13,12 +13,18 @@ public class KYCApprovedConsumer : IConsumer<KYCApproved>
     private readonly WalletDbContext _db;
     private readonly ILogger<KYCApprovedConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with the database context and logger.
+    /// </summary>
     public KYCApprovedConsumer(WalletDbContext db, ILogger<KYCApprovedConsumer> logger)
     {
         _db = db;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Handles an incoming KYCApproved event by marking the corresponding wallet as KYC-verified.
+    /// </summary>
     public async Task Consume(ConsumeContext<KYCApproved> context)
     {
         var msg = context.Message;

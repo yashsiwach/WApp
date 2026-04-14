@@ -46,15 +46,13 @@ public class RewardsServiceImpl : IRewardsQueryService, IRedemptionService, IPoi
     }
 
     /// <summary>Returns all currently available catalog items for redemption.</summary>
-    public Task<List<CatalogItemDto>> GetCatalogAsync() =>
-        _uow.Catalog.GetAvailableAsync();
+    public Task<List<CatalogItemDto>> GetCatalogAsync() =>_uow.Catalog.GetAvailableAsync();
 
     /// <summary>Validates redemption rules, deducts points, records transaction and redemption, publishes event, and returns response.</summary>
     public async Task<RedeemResponseDto> RedeemAsync(Guid userId, RedeemRequestDto request)
     {
         var account = await GetAccountOrThrow(userId);
-        var item    = await _uow.Catalog.FindByIdAsync(request.CatalogItemId)
-            ?? throw new KeyNotFoundException("Catalog item not found.");
+        var item    = await _uow.Catalog.FindByIdAsync(request.CatalogItemId)?? throw new KeyNotFoundException("Catalog item not found.");
 
         if (!item.IsAvailable)        throw new InvalidOperationException("This item is no longer available.");
         if (item.StockQuantity == 0)  throw new InvalidOperationException("Item is out of stock.");
@@ -62,9 +60,11 @@ public class RewardsServiceImpl : IRewardsQueryService, IRedemptionService, IPoi
         await using var tx = await _uow.BeginTransactionAsync();
         try
         {
+            // Validate that the user has enough points before making any changes
             if (account.PointsBalance < item.PointsCost)
                 throw new InvalidOperationException($"Insufficient points. You need {item.PointsCost}, you have {account.PointsBalance}.");
 
+            // Deduct points and record the transaction and redemption within the open transaction
             account.PointsBalance -= item.PointsCost;
             account.UpdatedAt      = DateTime.UtcNow;
 
@@ -88,6 +88,7 @@ public class RewardsServiceImpl : IRewardsQueryService, IRedemptionService, IPoi
             };
             await _uow.Redemptions.AddAsync(redemption);
 
+            // Decrement finite stock and mark item unavailable when it reaches zero
             if (item.StockQuantity > 0)
             {
                 item.StockQuantity -= 1;
@@ -152,9 +153,11 @@ public class RewardsServiceImpl : IRewardsQueryService, IRedemptionService, IPoi
             return;
         }
 
+        // Idempotency: skip awarding if the calculated points round to zero or below
         var pointsEarned = (int)Math.Round(amount * rule.PointsPerRupee);
         if (pointsEarned <= 0) return;
 
+        // Recalculate tier after updating lifetime points to reflect any threshold crossing
         account.PointsBalance  += pointsEarned;
         account.LifetimePoints += pointsEarned;
         account.Tier            = CalculateTier(account.LifetimePoints);

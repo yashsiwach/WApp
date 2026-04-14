@@ -6,17 +6,26 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace AuthService.Infrastructure.Repositories;
 
+/// <summary>
+/// Cache-backed EF Core implementation of IOTPRepository for OTP log persistence and lookup.
+/// </summary>
 public class OTPRepository : IOTPRepository
 {
     private readonly IMemoryCache _cache;
     private readonly AuthDbContext _db;
 
+    /// <summary>
+    /// Initializes the repository with an in-memory cache and the AuthService database context.
+    /// </summary>
     public OTPRepository(IMemoryCache cache, AuthDbContext db)
     {
         _cache = cache;
         _db = db;
     }
 
+    /// <summary>
+    /// Stores the OTP log in both the in-memory cache and the database.
+    /// </summary>
     public Task AddAsync(OTPLog log)
     {
         var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(log.ExpiresAt);
@@ -25,6 +34,9 @@ public class OTPRepository : IOTPRepository
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Returns a valid, unused OTP matching the email and code, checking the cache before the database.
+    /// </summary>
     public async Task<OTPLog?> FindValidAsync(string email, string code)
     {
         if (_cache.TryGetValue($"OTP:{email}:{code}", out OTPLog? log) && log != null)
@@ -49,6 +61,9 @@ public class OTPRepository : IOTPRepository
         return dbLog;
     }
 
+    /// <summary>
+    /// Checks whether the email has a successfully used OTP within the specified recency window.
+    /// </summary>
     public async Task<bool> HasRecentlyVerifiedOtpAsync(string email, TimeSpan maxAge)
     {
         var verifiedSince = DateTime.UtcNow.Subtract(maxAge);
@@ -71,5 +86,8 @@ public class OTPRepository : IOTPRepository
             .ExecuteUpdateAsync(s => s.SetProperty(o => o.UsedAt, usedAt));
     }
 
+    /// <summary>
+    /// Persists all pending changes to the database.
+    /// </summary>
     public async Task SaveAsync() => await _db.SaveChangesAsync();
 }

@@ -3,6 +3,9 @@ using SharedContracts.DTOs;
 
 namespace NotificationService.Application.Interfaces;
 
+/// <summary>
+/// Defines the core notification operations: sending, log retrieval, and template management.
+/// </summary>
 public interface INotificationService
 {
     /// <summary>Send a notification from a template, persisting the log.</summary>

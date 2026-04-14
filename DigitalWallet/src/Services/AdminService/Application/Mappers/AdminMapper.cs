@@ -6,6 +6,9 @@ namespace AdminService.Application.Mappers;
 /// <summary>Single responsibility: maps AdminService domain objects to DTOs.</summary>
 public static class AdminMapper
 {
+    /// <summary>
+    /// Maps a KYCReview domain entity to its corresponding KYCReviewDto.
+    /// </summary>
     public static KYCReviewDto ToDto(KYCReview k) => new()
     {
         Id          = k.Id,

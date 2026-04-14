@@ -11,23 +11,35 @@ namespace WalletService.Controllers;
 [ApiController]
 [Route("api/wallet")]
 [Authorize]
+/// <summary>
+/// Authenticated user-facing controller for wallet balance, top-up, transfer, and transaction history.
+/// </summary>
 public class WalletController : ControllerBase
 {
     private readonly IWalletQueryService _query;
     private readonly IWalletCommandService _command;
 
+    /// <summary>
+    /// Initializes the controller with separate query and command service dependencies.
+    /// </summary>
     public WalletController(IWalletQueryService query, IWalletCommandService command)
     {
         _query   = query;
         _command = command;
     }
 
+    /// <summary>
+    /// Extracts and parses the authenticated user's ID from the JWT claims.
+    /// </summary>
     private Guid GetUserId()
     {
         var raw = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
         return Guid.TryParse(raw, out var id) ? id : throw new UnauthorizedAccessException("User identity is invalid.");
     }
 
+    /// <summary>
+    /// Extracts the raw Bearer token string from the Authorization request header.
+    /// </summary>
     private string GetBearerToken() =>
         Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
 

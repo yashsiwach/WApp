@@ -3,13 +3,28 @@ using SupportTicketService.Domain.Entities;
 
 namespace SupportTicketService.Infrastructure.Data;
 
+/// <summary>
+/// Entity Framework Core database context for the SupportTicketService, managing tickets and replies.
+/// </summary>
 public class SupportDbContext : DbContext
 {
+    /// <summary>
+    /// Initializes the context with the provided EF Core options.
+    /// </summary>
     public SupportDbContext(DbContextOptions<SupportDbContext> options) : base(options) { }
 
+    /// <summary>
+    /// DbSet exposing the SupportTicket aggregate root table.
+    /// </summary>
     public DbSet<SupportTicket> Tickets => Set<SupportTicket>();
+    /// <summary>
+    /// DbSet exposing the TicketReply table.
+    /// </summary>
     public DbSet<TicketReply>   Replies => Set<TicketReply>();
 
+    /// <summary>
+    /// Configures entity constraints, indexes, and relationships for tickets and replies.
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

@@ -10,11 +10,20 @@ namespace NotificationService.Controllers;
 [ApiController]
 [Route("api/notifications")]
 [Authorize]
+/// <summary>
+/// Exposes notification history and template management endpoints for authenticated users and admins.
+/// </summary>
 public class NotificationsController : ControllerBase
 {
     private readonly INotificationService _svc;
+    /// <summary>
+    /// Initializes the controller with the notification service dependency.
+    /// </summary>
     public NotificationsController(INotificationService svc) => _svc = svc;
 
+    /// <summary>
+    /// Extracts the authenticated user's ID from JWT claims.
+    /// </summary>
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);
 

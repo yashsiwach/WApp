@@ -10,15 +10,26 @@ namespace AdminService.Controllers;
 [ApiController]
 [Route("api/admin/kyc")]
 [Authorize(Roles = "Admin")]
+/// <summary>
+/// Exposes admin endpoints for managing KYC document review submissions.
+/// </summary>
 public class KYCController : ControllerBase
 {
     private readonly IKYCManagementService _svc;
+    /// <summary>
+    /// Injects the KYC management service used to process review actions.
+    /// </summary>
     public KYCController(IKYCManagementService svc) => _svc = svc;
 
-    private Guid GetAdminId() =>
-        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);
+    /// <summary>
+    /// Extracts the authenticated admin's user ID from the current HTTP context claims.
+    /// </summary>
+    private Guid GetAdminId() =>Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);
 
-    /// <summary>List all pending KYC reviews (paginated).</summary>
+   
+    /// <summary>
+    /// List all pending KYC reviews (paginated).
+    /// </summary>
     [HttpGet("pending")]
     public async Task<IActionResult> GetPending([FromQuery] int page = 1, [FromQuery] int size = 20)
     {
@@ -26,7 +37,9 @@ public class KYCController : ControllerBase
         return Ok(ApiResponse<PaginatedResult<KYCReviewDto>>.Ok(result));
     }
 
-    /// <summary>Get a specific KYC review by ID.</summary>
+    /// <summary>
+    /// Get a specific KYC review by ID.
+    /// </summary>
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -34,7 +47,9 @@ public class KYCController : ControllerBase
         return Ok(ApiResponse<KYCReviewDto>.Ok(result));
     }
 
-    /// <summary>Approve a pending KYC review.</summary>
+    /// <summary>
+    /// Approve a pending KYC review.
+    /// </summary>
     [HttpPost("{id:guid}/approve")]
     public async Task<IActionResult> Approve(Guid id, [FromBody] KYCApproveRequest request)
     {
@@ -42,7 +57,9 @@ public class KYCController : ControllerBase
         return Ok(ApiResponse<KYCReviewDto>.Ok(result, "KYC approved successfully."));
     }
 
-    /// <summary>Reject a pending KYC review.</summary>
+    /// <summary>
+    /// Reject a pending KYC review.
+    /// </summary>
     [HttpPost("{id:guid}/reject")]
     public async Task<IActionResult> Reject(Guid id, [FromBody] KYCRejectRequest request)
     {

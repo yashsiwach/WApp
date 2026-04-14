@@ -12,18 +12,26 @@ public sealed class JwtTokenService : ITokenService
 {
     private readonly IConfiguration _config;
 
+    /// <summary>
+    /// Initializes the service with application configuration for reading JWT settings.
+    /// </summary>
     public JwtTokenService(IConfiguration config)
     {
         _config = config;
     }
 
+    /// <summary>
+    /// Builds and signs a JWT access token embedding the user's identity and role claims.
+    /// </summary>
     public (string AccessToken, DateTime ExpiresAt) GenerateAccessToken(User user)
     {
+        // Load JWT config and derive the signing key and expiry from settings
         var jwtSettings  = _config.GetSection("Jwt");
         var key          = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
         var credentials  = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiresAt    = DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiryMinutes"] ?? "60"));
 
+        // Build the standard claims including user ID, email, role, and a unique token ID
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub,   user.Id.ToString()),
@@ -38,6 +46,7 @@ public sealed class JwtTokenService : ITokenService
             claims.Add(new Claim(JwtRegisteredClaimNames.Aud, aud));
         }
 
+        // Construct and sign the token, then serialize it to a compact JWT string
         var token = new JwtSecurityToken(
             issuer:             jwtSettings["Issuer"],
             claims:             claims,
@@ -47,5 +56,8 @@ public sealed class JwtTokenService : ITokenService
         return (new JwtSecurityTokenHandler().WriteToken(token), expiresAt);
     }
 
+    /// <summary>
+    /// Produces a cryptographically random opaque refresh token string.
+    /// </summary>
     public string GenerateRefreshToken() => Convert.ToBase64String(Guid.NewGuid().ToByteArray()) + Convert.ToBase64String(Guid.NewGuid().ToByteArray());
 }

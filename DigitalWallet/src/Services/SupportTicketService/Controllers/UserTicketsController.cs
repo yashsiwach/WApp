@@ -7,6 +7,9 @@ using SupportTicketService.Application.Interfaces;
 
 namespace SupportTicketService.Controllers;
 
+/// <summary>
+/// Exposes authenticated user-facing REST endpoints for support ticket operations.
+/// </summary>
 [ApiController]
 [Route("api/support/tickets")]
 [Authorize]
@@ -14,13 +17,22 @@ public class UserTicketsController : ControllerBase
 {
     private readonly ITicketUserService _service;
 
+    /// <summary>
+    /// Initializes the controller with the user ticket service.
+    /// </summary>
     public UserTicketsController(ITicketUserService service) => _service = service;
 
+    /// <summary>
+    /// Extracts the authenticated user's identifier from JWT claims.
+    /// </summary>
     private Guid GetUserId()
     {
         var raw = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
         return Guid.TryParse(raw, out var id) ? id : throw new UnauthorizedAccessException("User identity is invalid.");
     }
+    /// <summary>
+    /// Extracts the authenticated user's email address from JWT claims.
+    /// </summary>
     private string GetUserEmail() => User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email") ?? string.Empty;
 
     /// <summary>Create a new support ticket.</summary>

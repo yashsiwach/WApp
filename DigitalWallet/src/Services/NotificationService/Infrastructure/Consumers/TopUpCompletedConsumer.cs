@@ -4,11 +4,20 @@ using SharedContracts.Events;
 
 namespace NotificationService.Infrastructure.Consumers;
 
+/// <summary>
+/// MassTransit consumer that emails the user a wallet top-up confirmation when funds are added.
+/// </summary>
 public class TopUpCompletedConsumer : IConsumer<TopUpCompleted>
 {
     private readonly INotificationService _svc;
+    /// <summary>
+    /// Initializes the consumer with the notification service dependency.
+    /// </summary>
     public TopUpCompletedConsumer(INotificationService svc) => _svc = svc;
 
+    /// <summary>
+    /// Handles the TopUpCompleted event by sending a top-up confirmation email with the credited amount.
+    /// </summary>
     public async Task Consume(ConsumeContext<TopUpCompleted> context)
     {
         var msg = context.Message;

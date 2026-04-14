@@ -13,12 +13,18 @@ public class KYCRejectedConsumer : IConsumer<KYCRejected>
     private readonly AuthDbContext _db;
     private readonly ILogger<KYCRejectedConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with database and logging dependencies.
+    /// </summary>
     public KYCRejectedConsumer(AuthDbContext db, ILogger<KYCRejectedConsumer> logger)
     {
         _db = db;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Processes a KYCRejected event by updating the corresponding document status to Rejected.
+    /// </summary>
     public async Task Consume(ConsumeContext<KYCRejected> context)
     {
         var msg = context.Message;

@@ -75,7 +75,8 @@ public class AuthServiceImpl : IAuthService
             TaskContinuationOptions.OnlyOnFaulted);
 
         // Issue tokens immediately so the client is authenticated right after signup.
-        return await IssueTokenPairAsync(user);
+        
+        return await IssueTokenPairAsync(user);//EOD
     }
 
     /// <summary>
@@ -92,10 +93,12 @@ public class AuthServiceImpl : IAuthService
 
         _logger.LogInformation("User logged in: {UserId}", user.Id);
 
-        return await IssueTokenPairAsync(user);
+        return await IssueTokenPairAsync(user);//EOD
     }
 
-    /// <summary>Revokes the provided refresh token if valid and returns a newly issued access and refresh token pair.</summary>
+    /// <summary>
+    /// Revokes the provided refresh token if valid and returns a newly issued access and refresh token pair.
+    /// </summary>
     public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
     {
         var stored = await _refreshTokens.FindActiveByTokenAsync(refreshToken);
@@ -108,7 +111,9 @@ public class AuthServiceImpl : IAuthService
         return await IssueTokenPairAsync(stored.User);
     }
 
-    /// <summary>Revokes the specified active refresh token for the user to complete logout.</summary>
+    /// <summary>
+    /// Revokes the specified active refresh token for the user to complete logout.
+    /// </summary>
     public async Task LogoutAsync(Guid userId, string refreshToken)
     {
         var token = await _refreshTokens.FindActiveByUserAndTokenAsync(userId, refreshToken);
@@ -121,21 +126,27 @@ public class AuthServiceImpl : IAuthService
         _logger.LogInformation("User logged out: {UserId}", userId);
     }
 
-    /// <summary>Resolves a user's ID from their email address, used by other services for transfers.</summary>
+    /// <summary>
+    /// Resolves a user's ID from their email address, used by other services for transfers.
+    /// </summary>
     public async Task<Guid?> GetUserIdByEmailAsync(string email)
     {
         var user = await _users.FindByEmailAsync(email.ToLower());
         return user?.Id;
     }
 
-    /// <summary>Returns all users for admin management views.</summary>
+    /// <summary>
+    /// Returns all users for admin management views.
+    /// </summary>
     public async Task<List<UserDto>> GetUsersAsync()
     {
         var users = await _users.GetAllAsync();
         return users.Select(AuthMapper.ToDto).ToList();
     }
 
-    /// <summary>Updates active status (block/unblock) for a user from admin panel.</summary>
+    /// <summary>
+    /// Updates active status (block/unblock) for a user from admin panel.
+    /// </summary>
     public async Task<UserDto> SetUserStatusAsync(Guid userId, bool isActive)
     {
         var user = await _users.FindByIdAsync(userId)
@@ -154,7 +165,7 @@ public class AuthServiceImpl : IAuthService
     /// <summary>Generates access and refresh tokens, persists the refresh token, and maps the auth response payload.</summary>
     private async Task<AuthResponse> IssueTokenPairAsync(User user)
     {
-        var (accessToken, expiresAt) = _tokenService.GenerateAccessToken(user);
+        var (accessToken, expiresAt) = _tokenService.GenerateAccessToken(user);//service in Infrastructure layer
 
         var refreshToken = new RefreshToken
         {

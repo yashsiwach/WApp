@@ -10,12 +10,18 @@ public class TopUpCompletedConsumer : IConsumer<TopUpCompleted>
     private readonly IPointsEarningService _rewardsService;
     private readonly ILogger<TopUpCompletedConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with the points-earning service and a logger.
+    /// </summary>
     public TopUpCompletedConsumer(IPointsEarningService rewardsService, ILogger<TopUpCompletedConsumer> logger)
     {
         _rewardsService = rewardsService;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Handles a TopUpCompleted message by awarding points to the user who performed the top-up.
+    /// </summary>
     public async Task Consume(ConsumeContext<TopUpCompleted> context)
     {
         var msg = context.Message;

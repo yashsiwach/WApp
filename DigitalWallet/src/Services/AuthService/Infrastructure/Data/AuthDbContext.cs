@@ -4,8 +4,14 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace AuthService.Infrastructure.Data;
 
+/// <summary>
+/// Entity Framework Core database context for the AuthService, managing users, OTPs, KYC documents, and refresh tokens.
+/// </summary>
 public class AuthDbContext : DbContext
 {
+    /// <summary>
+    /// Initializes the context with the provided EF Core options.
+    /// </summary>
     public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
 
     // Suppress: "KYCDocument/RefreshToken has a required navigation to User which has a
@@ -21,6 +27,9 @@ public class AuthDbContext : DbContext
     public DbSet<KYCDocument> KYCDocuments => Set<KYCDocument>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+    /// <summary>
+    /// Configures entity schemas, indexes, relationships, and query filters for all AuthService models.
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

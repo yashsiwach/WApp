@@ -6,17 +6,26 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace AuthService.Infrastructure.Repositories;
 
+/// <summary>
+/// Cache-backed EF Core implementation of IRefreshTokenRepository for refresh token persistence and lookup.
+/// </summary>
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
     private readonly IMemoryCache _cache;
     private readonly AuthDbContext _db;
 
+    /// <summary>
+    /// Initializes the repository with an in-memory cache and the AuthService database context.
+    /// </summary>
     public RefreshTokenRepository(IMemoryCache cache, AuthDbContext db)
     {
         _cache = cache;
         _db = db;
     }
 
+    /// <summary>
+    /// Retrieves a non-revoked, non-expired refresh token by its value, checking the cache before the database.
+    /// </summary>
     public async Task<RefreshToken?> FindActiveByTokenAsync(string token)
     {
         if (_cache.TryGetValue($"RefreshToken:{token}", out RefreshToken? rt) && rt != null && !rt.Revoked)
@@ -38,6 +47,9 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         return dbToken;
     }
 
+    /// <summary>
+    /// Retrieves an active refresh token scoped to a specific user, checking the cache before the database.
+    /// </summary>
     public async Task<RefreshToken?> FindActiveByUserAndTokenAsync(Guid userId, string token)
     {
         if (_cache.TryGetValue($"RefreshToken:{token}", out RefreshToken? rt) && rt != null && !rt.Revoked && rt.UserId == userId)
@@ -46,6 +58,9 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         return await _db.RefreshTokens.FirstOrDefaultAsync(r => r.Token == token && r.UserId == userId && !r.Revoked && r.ExpiresAt > DateTime.UtcNow);
     }
 
+    /// <summary>
+    /// Stores a new refresh token in both the in-memory cache and the database.
+    /// </summary>
     public Task AddAsync(RefreshToken token)
     {
         var options = new MemoryCacheEntryOptions().SetAbsoluteExpiration(token.ExpiresAt);
@@ -54,5 +69,8 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Persists all pending changes to the database.
+    /// </summary>
     public async Task SaveAsync() => await _db.SaveChangesAsync();
 }

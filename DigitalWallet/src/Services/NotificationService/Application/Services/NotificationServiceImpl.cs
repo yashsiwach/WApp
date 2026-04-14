@@ -6,6 +6,9 @@ using SharedContracts.DTOs;
 
 namespace NotificationService.Application.Services;
 
+/// <summary>
+/// Concrete implementation of INotificationService that resolves templates, sends via channel, and logs results.
+/// </summary>
 public class NotificationServiceImpl : INotificationService
 {
     private readonly INotificationLogRepository      _logs;
@@ -117,6 +120,9 @@ public class NotificationServiceImpl : INotificationService
         IsActive     = t.IsActive
     };
 
+    /// <summary>
+    /// Produces a minimal plain-text/HTML body when no matching template exists in the database.
+    /// </summary>
     private static string BuildFallbackBody(string type, Dictionary<string, string> placeholders)
     {
         if (type.Equals("OTP", StringComparison.OrdinalIgnoreCase) && placeholders.TryGetValue("Code", out var code))

@@ -7,6 +7,9 @@ using SupportTicketService.Application.Interfaces;
 
 namespace SupportTicketService.Controllers;
 
+/// <summary>
+/// Exposes admin-only REST endpoints for managing support tickets.
+/// </summary>
 [ApiController]
 [Route("api/support/admin/tickets")]
 [Authorize(Roles = "Admin")]
@@ -14,8 +17,14 @@ public class AdminTicketsController : ControllerBase
 {
     private readonly ITicketAdminService _service;
 
+    /// <summary>
+    /// Initializes the controller with the admin ticket service.
+    /// </summary>
     public AdminTicketsController(ITicketAdminService service) => _service = service;
 
+    /// <summary>
+    /// Extracts the authenticated admin's identifier from JWT claims.
+    /// </summary>
     private Guid GetAdminId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub")!);
 
     /// <summary>Get all tickets with optional filters.</summary>

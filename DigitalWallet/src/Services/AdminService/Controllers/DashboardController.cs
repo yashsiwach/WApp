@@ -9,9 +9,15 @@ namespace AdminService.Controllers;
 [ApiController]
 [Route("api/admin/dashboard")]
 [Authorize(Roles = "Admin")]
+/// <summary>
+/// Exposes admin dashboard statistics endpoints.
+/// </summary>
 public class DashboardController : ControllerBase
 {
     private readonly IDashboardService _svc;
+    /// <summary>
+    /// Injects the dashboard service used to retrieve aggregated statistics.
+    /// </summary>
     public DashboardController(IDashboardService svc) => _svc = svc;
 
     /// <summary>Get high-level admin dashboard statistics.</summary>

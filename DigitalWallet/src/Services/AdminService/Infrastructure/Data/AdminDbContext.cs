@@ -3,13 +3,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AdminService.Infrastructure.Data;
 
+/// <summary>
+/// Entity Framework Core database context for KYC reviews and admin activity logs.
+/// </summary>
 public class AdminDbContext : DbContext
 {
+    /// <summary>
+    /// Initialises the AdminDbContext with the provided EF Core options.
+    /// </summary>
     public AdminDbContext(DbContextOptions<AdminDbContext> options) : base(options) { }
 
     public DbSet<KYCReview> KYCReviews => Set<KYCReview>();
     public DbSet<AdminActivityLog> ActivityLogs => Set<AdminActivityLog>();
 
+    /// <summary>
+    /// Configures entity mappings, indexes, and column constraints for the admin schema.
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

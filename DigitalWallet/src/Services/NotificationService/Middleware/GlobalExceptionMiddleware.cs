@@ -4,12 +4,18 @@ using SharedContracts.Middleware;
 
 namespace NotificationService.Middleware;
 
+/// <summary>
+/// ASP.NET Core middleware that catches unhandled exceptions and returns structured JSON error responses.
+/// </summary>
 public class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IEnumerable<IExceptionHandler> _handlers;
     private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
+    /// <summary>
+    /// Initializes the middleware with the next delegate, registered exception handlers, and a logger.
+    /// </summary>
     public GlobalExceptionMiddleware(
         RequestDelegate next,
         IEnumerable<IExceptionHandler> handlers,
@@ -20,6 +26,9 @@ public class GlobalExceptionMiddleware
         _logger   = logger;
     }
 
+    /// <summary>
+    /// Processes the HTTP request and intercepts any unhandled exception to produce an error response.
+    /// </summary>
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -33,6 +42,9 @@ public class GlobalExceptionMiddleware
         }
     }
 
+    /// <summary>
+    /// Delegates to the appropriate IExceptionHandler, sets the HTTP status code, and writes a JSON error body.
+    /// </summary>
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         var handler = _handlers.First(h => h.CanHandle(exception));

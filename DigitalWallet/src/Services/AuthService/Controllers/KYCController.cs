@@ -7,6 +7,9 @@ using SharedContracts.DTOs;
 
 namespace AuthService.Controllers;
 
+/// <summary>
+/// Handles KYC document submission and review-status retrieval for authenticated users.
+/// </summary>
 [ApiController]
 [Route("api/auth/kyc")]
 [Authorize]
@@ -14,6 +17,9 @@ public class KYCController : ControllerBase
 {
     private readonly IKYCService _kycService;
 
+    /// <summary>
+    /// Initializes the controller with the KYC service dependency.
+    /// </summary>
     public KYCController(IKYCService kycService)
     {
         _kycService = kycService;

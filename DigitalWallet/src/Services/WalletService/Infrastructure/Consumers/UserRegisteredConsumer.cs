@@ -14,12 +14,18 @@ public class UserRegisteredConsumer : IConsumer<UserRegistered>
     private readonly WalletDbContext _db;
     private readonly ILogger<UserRegisteredConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with the database context and logger.
+    /// </summary>
     public UserRegisteredConsumer(WalletDbContext db, ILogger<UserRegisteredConsumer> logger)
     {
         _db = db;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Handles an incoming UserRegistered event by provisioning a new wallet for the user.
+    /// </summary>
     public async Task Consume(ConsumeContext<UserRegistered> context)
     {
         var msg = context.Message;

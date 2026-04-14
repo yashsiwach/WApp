@@ -10,12 +10,18 @@ public class TransferCompletedConsumer : IConsumer<TransferCompleted>
     private readonly IPointsEarningService _rewardsService;
     private readonly ILogger<TransferCompletedConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with the points-earning service and a logger.
+    /// </summary>
     public TransferCompletedConsumer(IPointsEarningService rewardsService, ILogger<TransferCompletedConsumer> logger)
     {
         _rewardsService = rewardsService;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Handles a TransferCompleted message by awarding points to the transfer sender.
+    /// </summary>
     public async Task Consume(ConsumeContext<TransferCompleted> context)
     {
         var msg = context.Message;

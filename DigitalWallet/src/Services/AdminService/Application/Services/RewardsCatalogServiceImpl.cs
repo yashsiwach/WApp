@@ -6,22 +6,31 @@ using AdminService.Infrastructure.Data;
 
 namespace AdminService.Application.Services;
 
+/// <summary>
+/// Implements admin management of the rewards catalog including create, update, and soft-delete operations.
+/// </summary>
 public class RewardsCatalogServiceImpl : IRewardsCatalogService
 {
     private readonly RewardsAdminDbContext _rewardsDb;
     private readonly IActivityLogRepository _logs;
 
+    /// <summary>
+    /// Injects the rewards database context and activity log repository.
+    /// </summary>
     public RewardsCatalogServiceImpl(RewardsAdminDbContext rewardsDb, IActivityLogRepository logs)
     {
         _rewardsDb = rewardsDb;
         _logs = logs;
     }
 
+    /// <summary>
+    /// Validates the request, persists the new catalog item, and writes an admin activity log entry.
+    /// </summary>
     public async Task<CatalogItemAdminDto> CreateAsync(Guid adminId, CreateCatalogItemRequest request)
     {
-        if (request.PointsCost <= 0)
-            throw new InvalidOperationException("PointsCost must be greater than 0.");
+        if (request.PointsCost <= 0)throw new InvalidOperationException("PointsCost must be greater than 0.");
 
+        // Build the new catalog item entity from the incoming request
         var item = new RewardsCatalogItem
         {
             Name = request.Name,
@@ -34,6 +43,7 @@ public class RewardsCatalogServiceImpl : IRewardsCatalogService
             UpdatedAt = DateTime.UtcNow
         };
 
+        // Persist the new item to the rewards database
         await _rewardsDb.CatalogItems.AddAsync(item);
         await _rewardsDb.SaveChangesAsync();
 
@@ -59,14 +69,16 @@ public class RewardsCatalogServiceImpl : IRewardsCatalogService
         };
     }
 
+    /// <summary>
+    /// Looks up the catalog item, applies updated field values, saves changes, and writes an admin activity log entry.
+    /// </summary>
     public async Task<CatalogItemAdminDto> UpdateAsync(Guid adminId, Guid itemId, UpdateCatalogItemRequest request)
     {
-        if (request.PointsCost <= 0)
-            throw new InvalidOperationException("PointsCost must be greater than 0.");
+        if (request.PointsCost <= 0)throw new InvalidOperationException("PointsCost must be greater than 0.");
 
+        // Catalog lookup — throws if item does not exist
         var item = await _rewardsDb.CatalogItems.FindAsync(itemId);
-        if (item == null)
-            throw new KeyNotFoundException($"Catalog item with ID {itemId} not found.");
+        if (item == null)throw new KeyNotFoundException($"Catalog item with ID {itemId} not found.");
 
         var oldName = item.Name;
         item.Name = request.Name;
@@ -76,6 +88,7 @@ public class RewardsCatalogServiceImpl : IRewardsCatalogService
         item.IsAvailable = request.IsAvailable;
         item.UpdatedAt = DateTime.UtcNow;
 
+        // Persist the updated catalog item to the database
         _rewardsDb.CatalogItems.Update(item);
         await _rewardsDb.SaveChangesAsync();
 
@@ -101,12 +114,17 @@ public class RewardsCatalogServiceImpl : IRewardsCatalogService
         };
     }
 
+    /// <summary>
+    /// Soft-deletes a catalog item by marking it unavailable, then logs the admin action.
+    /// </summary>
     public async Task DeleteAsync(Guid adminId, Guid itemId)
     {
+        // Catalog lookup — throws if item does not exist
         var item = await _rewardsDb.CatalogItems.FindAsync(itemId);
         if (item == null)
             throw new KeyNotFoundException($"Catalog item with ID {itemId} not found.");
 
+        // Stock/availability validation: only update if the item is still active
         if (item.IsAvailable)
         {
             item.IsAvailable = false;

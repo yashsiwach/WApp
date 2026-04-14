@@ -4,11 +4,20 @@ using SharedContracts.Events;
 
 namespace NotificationService.Infrastructure.Consumers;
 
+/// <summary>
+/// MassTransit consumer that emails the user when loyalty points are credited to their account.
+/// </summary>
 public class PointsEarnedConsumer : IConsumer<PointsEarned>
 {
     private readonly INotificationService _svc;
+    /// <summary>
+    /// Initializes the consumer with the notification service dependency.
+    /// </summary>
     public PointsEarnedConsumer(INotificationService svc) => _svc = svc;
 
+    /// <summary>
+    /// Handles the PointsEarned event by sending an email with the earned points, new balance, and tier.
+    /// </summary>
     public async Task Consume(ConsumeContext<PointsEarned> context)
     {
         var msg = context.Message;

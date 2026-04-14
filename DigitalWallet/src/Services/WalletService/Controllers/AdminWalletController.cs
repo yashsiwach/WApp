@@ -10,10 +10,16 @@ namespace WalletService.Controllers;
 [ApiController]
 [Route("api/admin/wallet")]
 [Authorize(Roles = "Admin")]
+/// <summary>
+/// Admin-only controller exposing aggregated wallet and transaction statistics.
+/// </summary>
 public class AdminWalletController : ControllerBase
 {
     private readonly WalletDbContext _db;
 
+    /// <summary>
+    /// Initializes the controller with a direct database context for read-only admin queries.
+    /// </summary>
     public AdminWalletController(WalletDbContext db)
     {
         _db = db;

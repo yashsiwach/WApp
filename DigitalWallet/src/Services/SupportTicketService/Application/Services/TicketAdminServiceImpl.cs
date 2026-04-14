@@ -9,6 +9,9 @@ using SupportTicketService.Domain.Entities;
 
 namespace SupportTicketService.Application.Services;
 
+/// <summary>
+/// Implements admin-facing support ticket operations including listing, replying, and status management.
+/// </summary>
 public class TicketAdminServiceImpl : ITicketAdminService
 {
     private readonly IUnitOfWork _uow;

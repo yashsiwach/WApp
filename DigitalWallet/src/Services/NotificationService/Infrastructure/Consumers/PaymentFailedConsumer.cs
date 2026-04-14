@@ -4,11 +4,20 @@ using SharedContracts.Events;
 
 namespace NotificationService.Infrastructure.Consumers;
 
+/// <summary>
+/// MassTransit consumer that notifies the user by email when a payment or transfer attempt fails.
+/// </summary>
 public class PaymentFailedConsumer : IConsumer<PaymentFailed>
 {
     private readonly INotificationService _svc;
+    /// <summary>
+    /// Initializes the consumer with the notification service dependency.
+    /// </summary>
     public PaymentFailedConsumer(INotificationService svc) => _svc = svc;
 
+    /// <summary>
+    /// Handles the PaymentFailed event by sending a failure notification with the amount, type, and reason.
+    /// </summary>
     public async Task Consume(ConsumeContext<PaymentFailed> context)
     {
         var msg = context.Message;

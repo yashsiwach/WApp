@@ -5,12 +5,18 @@ using SharedContracts.DTOs;
 
 namespace AuthService.Controllers;
 
+/// <summary>
+/// Handles OTP generation and verification endpoints for email-based authentication flows.
+/// </summary>
 [ApiController]
 [Route("api/auth/otp")]
 public class OTPController : ControllerBase
 {
     private readonly IOTPService _otpService;
 
+    /// <summary>
+    /// Initializes the controller with the OTP service dependency.
+    /// </summary>
     public OTPController(IOTPService otpService)
     {
         _otpService = otpService;

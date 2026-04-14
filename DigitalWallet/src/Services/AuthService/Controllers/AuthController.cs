@@ -7,12 +7,18 @@ using SharedContracts.DTOs;
 
 namespace AuthService.Controllers;
 
+/// <summary>
+/// Handles user registration, login, token management, and admin user-status operations.
+/// </summary>
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
 
+    /// <summary>
+    /// Initializes the controller with the authentication service dependency.
+    /// </summary>
     public AuthController(IAuthService authService)
     {
         _authService = authService;

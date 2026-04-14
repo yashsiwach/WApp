@@ -7,6 +7,9 @@ using SharedContracts.DTOs;
 
 namespace RewardsService.Controllers;
 
+/// <summary>
+/// API controller exposing rewards account, catalog, transaction, and redemption endpoints.
+/// </summary>
 [ApiController]
 [Route("api/rewards")]
 [Authorize]
@@ -15,12 +18,18 @@ public class RewardsController : ControllerBase
     private readonly IRewardsQueryService _query;
     private readonly IRedemptionService _redemption;
 
+    /// <summary>
+    /// Initializes the controller with query and redemption service dependencies.
+    /// </summary>
     public RewardsController(IRewardsQueryService query, IRedemptionService redemption)
     {
         _query      = query;
         _redemption = redemption;
     }
 
+    /// <summary>
+    /// Extracts and validates the authenticated user's identifier from JWT claims.
+    /// </summary>
     private Guid GetUserId()
     {
         var raw = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");

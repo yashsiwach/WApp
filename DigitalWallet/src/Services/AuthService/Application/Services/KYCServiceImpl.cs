@@ -14,7 +14,9 @@ public class KYCServiceImpl : IKYCService
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<KYCServiceImpl> _logger;
 
-    /// <summary>Initializes KYC persistence, event publishing, and logging dependencies.</summary>
+    /// <summary>
+    /// Initializes KYC persistence, event publishing, and logging dependencies.
+    /// </summary>
     public KYCServiceImpl(IKYCRepository kyc, IPublishEndpoint publishEndpoint, ILogger<KYCServiceImpl> logger)
     {
         _kyc = kyc;
@@ -22,7 +24,9 @@ public class KYCServiceImpl : IKYCService
         _logger = logger;
     }
 
-    /// <summary>Validates and stores a new KYC document submission, then publishes a KYC submitted event.</summary>
+    /// <summary>
+    /// Validates and stores a new KYC document submission, then publishes a KYC submitted event.
+    /// </summary>
     public async Task<KYCStatusResponse> SubmitAsync(Guid userId, KYCSubmitRequest request)
     {
         var user = await _kyc.FindUserByIdAsync(userId)?? throw new InvalidOperationException("User not found.");
@@ -57,7 +61,9 @@ public class KYCServiceImpl : IKYCService
         return AuthMapper.ToDto(doc);
     }
 
-    /// <summary>Retrieves all KYC documents for a user and returns their mapped status responses.</summary>
+    /// <summary>
+    /// Retrieves all KYC documents for a user and returns their mapped status responses.
+    /// </summary>
     public async Task<List<KYCStatusResponse>> GetStatusAsync(Guid userId)
     {
         var docs = await _kyc.GetByUserIdAsync(userId);

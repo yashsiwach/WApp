@@ -10,12 +10,18 @@ public class TicketRepliedConsumer : IConsumer<TicketReplied>
     private readonly INotificationService _notifications;
     private readonly ILogger<TicketRepliedConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with the notification service and logger.
+    /// </summary>
     public TicketRepliedConsumer(INotificationService notifications, ILogger<TicketRepliedConsumer> logger)
     {
         _notifications = notifications;
         _logger        = logger;
     }
 
+    /// <summary>
+    /// Handles the TicketReplied event by routing an admin-reply or user-reply notification email to the recipient.
+    /// </summary>
     public async Task Consume(ConsumeContext<TicketReplied> context)
     {
         var msg = context.Message;

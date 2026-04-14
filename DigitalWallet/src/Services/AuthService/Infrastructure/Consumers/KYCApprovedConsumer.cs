@@ -13,12 +13,18 @@ public class KYCApprovedConsumer : IConsumer<KYCApproved>
     private readonly AuthDbContext _db;
     private readonly ILogger<KYCApprovedConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with database and logging dependencies.
+    /// </summary>
     public KYCApprovedConsumer(AuthDbContext db, ILogger<KYCApprovedConsumer> logger)
     {
         _db = db;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Processes a KYCApproved event by updating the corresponding document status to Approved.
+    /// </summary>
     public async Task Consume(ConsumeContext<KYCApproved> context)
     {
         var msg = context.Message;

@@ -9,6 +9,9 @@ using SupportTicketService.Domain.Entities;
 
 namespace SupportTicketService.Application.Services;
 
+/// <summary>
+/// Implements end-user support ticket operations including creation, retrieval, and reply.
+/// </summary>
 public class TicketUserServiceImpl : ITicketUserService
 {
     private readonly IUnitOfWork _uow;
@@ -26,6 +29,7 @@ public class TicketUserServiceImpl : ITicketUserService
     /// <summary>Creates a new support ticket for the user, persists it, and publishes a ticket created event.</summary>
     public async Task<TicketDto> CreateAsync(Guid userId, string userEmail, CreateTicketRequest request)
     {
+        // Build the new ticket entity from the incoming request and caller identity
         var ticket = new SupportTicket
         {
             UserId      = userId,
@@ -42,6 +46,7 @@ public class TicketUserServiceImpl : ITicketUserService
 
         _logger.LogInformation("Ticket created: {TicketNumber} by User {UserId}", ticket.TicketNumber, userId);
 
+        // Publish domain event so downstream services (e.g. NotificationService) can react
         await _bus.Publish(new TicketCreated
         {
             TicketId     = ticket.Id,

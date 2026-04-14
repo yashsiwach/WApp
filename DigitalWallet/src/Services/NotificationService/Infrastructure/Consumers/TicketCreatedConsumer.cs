@@ -10,12 +10,18 @@ public class TicketCreatedConsumer : IConsumer<TicketCreated>
     private readonly INotificationService _notifications;
     private readonly ILogger<TicketCreatedConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with the notification service and logger.
+    /// </summary>
     public TicketCreatedConsumer(INotificationService notifications, ILogger<TicketCreatedConsumer> logger)
     {
         _notifications = notifications;
         _logger        = logger;
     }
 
+    /// <summary>
+    /// Handles the TicketCreated event by sending a confirmation email with ticket number, subject, and category.
+    /// </summary>
     public async Task Consume(ConsumeContext<TicketCreated> context)
     {
         var msg = context.Message;

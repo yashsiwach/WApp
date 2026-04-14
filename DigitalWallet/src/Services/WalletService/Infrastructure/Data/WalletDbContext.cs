@@ -3,8 +3,14 @@ using WalletService.Domain.Entities;
 
 namespace WalletService.Infrastructure.Data;
 
+/// <summary>
+/// Entity Framework Core database context for the WalletService, exposing all wallet-related entity sets.
+/// </summary>
 public class WalletDbContext : DbContext
 {
+    /// <summary>
+    /// Initializes the database context with the provided EF Core options.
+    /// </summary>
     public WalletDbContext(DbContextOptions<WalletDbContext> options) : base(options) { }
 
     public DbSet<WalletAccount> WalletAccounts => Set<WalletAccount>();
@@ -13,6 +19,9 @@ public class WalletDbContext : DbContext
     public DbSet<TransferRequest> TransferRequests => Set<TransferRequest>();
     public DbSet<DailyLimitTracker> DailyLimitTrackers => Set<DailyLimitTracker>();
 
+    /// <summary>
+    /// Configures entity schemas, constraints, indexes, and relationships for all wallet domain types.
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

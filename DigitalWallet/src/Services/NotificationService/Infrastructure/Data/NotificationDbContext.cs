@@ -3,13 +3,28 @@ using NotificationService.Domain.Entities;
 
 namespace NotificationService.Infrastructure.Data;
 
+/// <summary>
+/// EF Core database context for the NotificationService, managing logs and templates.
+/// </summary>
 public class NotificationDbContext : DbContext
 {
+    /// <summary>
+    /// Initializes the context with the provided EF Core options.
+    /// </summary>
     public NotificationDbContext(DbContextOptions<NotificationDbContext> options) : base(options) { }
 
+    /// <summary>
+    /// Set of persisted notification delivery log entries.
+    /// </summary>
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
+    /// <summary>
+    /// Set of notification content templates used to render messages.
+    /// </summary>
     public DbSet<NotificationTemplate> Templates => Set<NotificationTemplate>();
 
+    /// <summary>
+    /// Configures entity constraints, indexes, and seeds default notification templates.
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -42,6 +57,9 @@ public class NotificationDbContext : DbContext
         SeedTemplates(modelBuilder);
     }
 
+    /// <summary>
+    /// Seeds the database with the default set of notification templates for all supported event types.
+    /// </summary>
     private static void SeedTemplates(ModelBuilder modelBuilder)
     {
         var templates = new[]

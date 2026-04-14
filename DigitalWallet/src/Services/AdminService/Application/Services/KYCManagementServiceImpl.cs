@@ -30,25 +30,21 @@ public class KYCManagementServiceImpl : IKYCManagementService
     }
 
     /// <summary>Returns paginated pending KYC reviews for admin processing.</summary>
-    public Task<PaginatedResult<KYCReviewDto>> GetPendingAsync(int page, int size) =>
-        _reviews.GetPendingPagedAsync(page, size);
+    public Task<PaginatedResult<KYCReviewDto>> GetPendingAsync(int page, int size) =>_reviews.GetPendingPagedAsync(page, size);
 
     /// <summary>Fetches a KYC review by id and maps it to DTO or throws when missing.</summary>
     public async Task<KYCReviewDto> GetByIdAsync(Guid reviewId)
     {
-        var review = await _reviews.FindByIdAsync(reviewId)
-            ?? throw new KeyNotFoundException("KYC review not found.");
+        var review = await _reviews.FindByIdAsync(reviewId)?? throw new KeyNotFoundException("KYC review not found.");
         return AdminMapper.ToDto(review);
     }
 
     /// <summary>Approves a pending KYC review, records admin activity, publishes approval event, and returns updated DTO.</summary>
     public async Task<KYCReviewDto> ApproveAsync(Guid reviewId, Guid adminId, KYCApproveRequest request)
     {
-        var review = await _reviews.FindByIdAsync(reviewId)
-            ?? throw new KeyNotFoundException("KYC review not found.");
+        var review = await _reviews.FindByIdAsync(reviewId)?? throw new KeyNotFoundException("KYC review not found.");
 
-        if (review.Status != "Pending")
-            throw new InvalidOperationException($"Cannot approve a review with status '{review.Status}'.");
+        if (review.Status != "Pending")throw new InvalidOperationException($"Cannot approve a review with status '{review.Status}'.");
 
         review.Status      = "Approved";
         review.ReviewNotes = request.Notes;
@@ -75,8 +71,7 @@ public class KYCManagementServiceImpl : IKYCManagementService
             OccurredAt = DateTime.UtcNow
         });
 
-        _logger.LogInformation("KYC approved: Document {DocId} for User {UserId} by Admin {AdminId}",
-            review.DocumentId, review.UserId, adminId);
+        _logger.LogInformation("KYC approved: Document {DocId} for User {UserId} by Admin {AdminId}",review.DocumentId, review.UserId, adminId);
 
         return AdminMapper.ToDto(review);
     }
@@ -84,11 +79,9 @@ public class KYCManagementServiceImpl : IKYCManagementService
     /// <summary>Rejects a pending KYC review, records admin activity, publishes rejection event, and returns updated DTO.</summary>
     public async Task<KYCReviewDto> RejectAsync(Guid reviewId, Guid adminId, KYCRejectRequest request)
     {
-        var review = await _reviews.FindByIdAsync(reviewId)
-            ?? throw new KeyNotFoundException("KYC review not found.");
+        var review = await _reviews.FindByIdAsync(reviewId)?? throw new KeyNotFoundException("KYC review not found.");
 
-        if (review.Status != "Pending")
-            throw new InvalidOperationException($"Cannot reject a review with status '{review.Status}'.");
+        if (review.Status != "Pending")throw new InvalidOperationException($"Cannot reject a review with status '{review.Status}'.");
 
         review.Status      = "Rejected";
         review.ReviewNotes = request.Reason;
@@ -115,8 +108,7 @@ public class KYCManagementServiceImpl : IKYCManagementService
             OccurredAt = DateTime.UtcNow
         });
 
-        _logger.LogInformation("KYC rejected: Document {DocId} for User {UserId} by Admin {AdminId}",
-            review.DocumentId, review.UserId, adminId);
+        _logger.LogInformation("KYC rejected: Document {DocId} for User {UserId} by Admin {AdminId}",review.DocumentId, review.UserId, adminId);
 
         return AdminMapper.ToDto(review);
     }

@@ -13,21 +13,27 @@ public sealed class SmtpEmailSender : IEmailSender
     private readonly SmtpOptions _options;
     private readonly ILogger<SmtpEmailSender> _logger;
 
+    /// <summary>
+    /// Initializes the sender with resolved SMTP options and a logger.
+    /// </summary>
     public SmtpEmailSender(IOptions<SmtpOptions> options, ILogger<SmtpEmailSender> logger)
     {
         _options = options.Value;
         _logger  = logger;
     }
 
+    /// <summary>
+    /// Composes a MimeMessage and delivers it via the configured SMTP server.
+    /// </summary>
     public async Task SendAsync(string toEmail, string toName, string subject, string htmlBody)
     {
         var fromEmail = string.IsNullOrWhiteSpace(_options.FromEmail) ? _options.Username : _options.FromEmail;
-        if (_options.Host.Contains("gmail", StringComparison.OrdinalIgnoreCase) &&
-            !string.IsNullOrWhiteSpace(_options.Username))
+        if (_options.Host.Contains("gmail", StringComparison.OrdinalIgnoreCase) &&!string.IsNullOrWhiteSpace(_options.Username))
         {
             fromEmail = _options.Username;
         }
 
+        // Compose the MIME message with From, To, Subject, and HTML body
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_options.FromName, fromEmail));
         message.To.Add(new MailboxAddress(toName, toEmail));
@@ -41,10 +47,10 @@ public sealed class SmtpEmailSender : IEmailSender
                 ? SecureSocketOptions.StartTls
                 : SecureSocketOptions.None;
 
+            // Connect to SMTP server, authenticate, and dispatch the message
             await client.ConnectAsync(_options.Host, _options.Port, secureSocketOptions);
 
-            if (!string.IsNullOrWhiteSpace(_options.Username))
-                await client.AuthenticateAsync(_options.Username, _options.Password);
+            if (!string.IsNullOrWhiteSpace(_options.Username))await client.AuthenticateAsync(_options.Username, _options.Password);
 
             await client.SendAsync(message);
             _logger.LogInformation("Email sent to {ToEmail}: {Subject}", toEmail, subject);

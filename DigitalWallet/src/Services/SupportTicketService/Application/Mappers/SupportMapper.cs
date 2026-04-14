@@ -3,8 +3,14 @@ using SupportTicketService.Domain.Entities;
 
 namespace SupportTicketService.Application.Mappers;
 
+/// <summary>
+/// Provides static mapping methods between domain entities and their DTO representations.
+/// </summary>
 public static class SupportMapper
 {
+    /// <summary>
+    /// Maps a TicketReply entity to its corresponding TicketReplyDto.
+    /// </summary>
     public static TicketReplyDto ToDto(TicketReply r) => new()
     {
         Id         = r.Id,
@@ -14,6 +20,9 @@ public static class SupportMapper
         CreatedAt  = r.CreatedAt
     };
 
+    /// <summary>
+    /// Maps a SupportTicket entity to a lightweight TicketSummaryDto without reply details.
+    /// </summary>
     public static TicketSummaryDto ToSummary(SupportTicket t) => new()
     {
         Id           = t.Id,
@@ -27,6 +36,9 @@ public static class SupportMapper
         UpdatedAt    = t.UpdatedAt
     };
 
+    /// <summary>
+    /// Maps a SupportTicket entity to a full TicketDto including all ordered replies.
+    /// </summary>
     public static TicketDto ToDetail(SupportTicket t) => new()
     {
         Id           = t.Id,

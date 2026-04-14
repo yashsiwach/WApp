@@ -10,12 +10,18 @@ public class UserRegisteredConsumer : IConsumer<UserRegistered>
     private readonly IPointsEarningService _rewardsService;
     private readonly ILogger<UserRegisteredConsumer> _logger;
 
+    /// <summary>
+    /// Initializes the consumer with the points-earning service and a logger.
+    /// </summary>
     public UserRegisteredConsumer(IPointsEarningService rewardsService, ILogger<UserRegisteredConsumer> logger)
     {
         _rewardsService = rewardsService;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Handles a UserRegistered message by provisioning a new rewards account for the user.
+    /// </summary>
     public async Task Consume(ConsumeContext<UserRegistered> context)
     {
         var msg = context.Message;

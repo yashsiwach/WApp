@@ -3,16 +3,40 @@ using RewardsService.Domain.Entities;
 
 namespace RewardsService.Infrastructure.Data;
 
+/// <summary>
+/// Entity Framework Core database context for the RewardsService, covering accounts, transactions, rules, catalog, and redemptions.
+/// </summary>
 public class RewardsDbContext : DbContext
 {
+    /// <summary>
+    /// Initializes the context with the provided EF Core options.
+    /// </summary>
     public RewardsDbContext(DbContextOptions<RewardsDbContext> options) : base(options) { }
 
+    /// <summary>
+    /// Table of rewards accounts, one per application user.
+    /// </summary>
     public DbSet<RewardsAccount> RewardsAccounts => Set<RewardsAccount>();
+    /// <summary>
+    /// Table of all points transactions (earn, redeem, expire, adjust).
+    /// </summary>
     public DbSet<RewardsTransaction> RewardsTransactions => Set<RewardsTransaction>();
+    /// <summary>
+    /// Table of earn rules that define points awarded per trigger type.
+    /// </summary>
     public DbSet<EarnRule> EarnRules => Set<EarnRule>();
+    /// <summary>
+    /// Table of catalog items available for redemption.
+    /// </summary>
     public DbSet<RewardsCatalogItem> CatalogItems => Set<RewardsCatalogItem>();
+    /// <summary>
+    /// Table of user redemption records.
+    /// </summary>
     public DbSet<Redemption> Redemptions => Set<Redemption>();
 
+    /// <summary>
+    /// Configures entity mappings, indexes, constraints, and seeds default earn rules.
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
