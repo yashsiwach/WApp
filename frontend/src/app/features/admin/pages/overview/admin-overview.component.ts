@@ -32,205 +32,8 @@ interface StatCard {
   selector: 'app-admin-overview',
   standalone: true,
   imports: [DecimalPipe, LoaderComponent],
-  template: `
-    <div class="space-y-6">
+  templateUrl: './admin-overview.component.html',
 
-      <!-- Header -->
-      <div>
-        <h2 class="text-xl font-display font-bold text-zinc-100">System Overview</h2>
-        <p class="text-zinc-500 text-sm mt-1">Real-time stats from all services</p>
-      </div>
-
-      <app-loader [show]="loading" />
-
-      @if (!loading) {
-
-        <!-- ── Stat Cards ── -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          @for (card of statCards; track card.label) {
-            <div
-              class="rounded-xl p-4 border transition-all"
-              [class.bg-zinc-900]="card.available"
-              [class.border-zinc-800]="card.available"
-              [class.bg-zinc-900/40]="!card.available"
-              [class.border-zinc-800/50]="!card.available"
-              [attr.title]="card.tooltip ?? null"
-            >
-              <p class="text-xs uppercase tracking-wider truncate"
-                 [class.text-zinc-500]="card.available"
-                 [class.text-zinc-600]="!card.available">
-                {{ card.label }}
-              </p>
-              <div class="flex items-end justify-between mt-2 gap-1">
-                <p class="text-2xl font-bold leading-none"
-                   [class]="card.available ? card.color : 'text-zinc-600'">
-                  {{ card.value }}
-                </p>
-                @if (!card.available) {
-                  <span class="text-[10px] text-zinc-600 border border-zinc-700 rounded px-1 cursor-help shrink-0">N/A</span>
-                }
-              </div>
-            </div>
-          }
-        </div>
-
-        <!-- ── Analytics Row ── -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-          <!-- User Registration Trend -->
-          <div class="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-semibold text-zinc-200">User Registrations</h3>
-              <span class="text-xs text-zinc-500">Last 6 months</span>
-            </div>
-            <!-- Bar area: fixed 80px height, bars grow from bottom -->
-            <div class="flex items-end gap-2" style="height:80px">
-              @for (bar of registrationTrend; track bar.label) {
-                <div class="flex-1 flex flex-col items-center justify-end gap-1">
-                  <span class="text-[10px] text-zinc-500 font-medium leading-none">{{ bar.count }}</span>
-                  <div
-                    class="w-full bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-sm transition-all duration-700"
-                    [style.height.px]="bar.barPx"
-                  ></div>
-                </div>
-              }
-            </div>
-            <!-- Label row below -->
-            <div class="flex gap-2 mt-2">
-              @for (bar of registrationTrend; track bar.label) {
-                <span class="flex-1 text-center text-[10px] text-zinc-500">{{ bar.label }}</span>
-              }
-            </div>
-          </div>
-
-          <!-- KYC Stats -->
-          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
-            <h3 class="text-sm font-semibold text-zinc-200">KYC Today</h3>
-
-            <div class="space-y-3">
-              <!-- Approval Rate -->
-              <div>
-                <div class="flex justify-between text-xs text-zinc-400 mb-1.5">
-                  <span>Approval Rate</span>
-                  <span class="font-semibold text-emerald-400">{{ kycApprovalRate }}%</span>
-                </div>
-                <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    class="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-700"
-                    [style.width.%]="kycApprovalRate"
-                  ></div>
-                </div>
-              </div>
-
-              <!-- Stats breakdown -->
-              <div class="grid grid-cols-3 gap-2 pt-2">
-                <div class="text-center">
-                  <p class="text-lg font-bold text-amber-300">{{ stats?.pendingKYCCount ?? 0 }}</p>
-                  <p class="text-[10px] text-zinc-500 mt-0.5">Pending</p>
-                </div>
-                <div class="text-center">
-                  <p class="text-lg font-bold text-emerald-400">{{ stats?.approvedKYCToday ?? 0 }}</p>
-                  <p class="text-[10px] text-zinc-500 mt-0.5">Approved</p>
-                </div>
-                <div class="text-center">
-                  <p class="text-lg font-bold text-rose-400">{{ stats?.rejectedKYCToday ?? 0 }}</p>
-                  <p class="text-[10px] text-zinc-500 mt-0.5">Rejected</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── User Breakdown ── -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-          <!-- User Activity Bar -->
-          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <h3 class="text-sm font-semibold text-zinc-200 mb-4">User Activity Breakdown</h3>
-            <div class="space-y-3">
-              <div>
-                <div class="flex justify-between text-xs text-zinc-400 mb-1.5">
-                  <span>Active Users</span>
-                  <span class="font-semibold text-emerald-400">{{ activeUsers }} / {{ totalUsers }}</span>
-                </div>
-                <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    class="h-full bg-emerald-500 rounded-full transition-all duration-700"
-                    [style.width.%]="totalUsers > 0 ? (activeUsers / totalUsers * 100) : 0"
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div class="flex justify-between text-xs text-zinc-400 mb-1.5">
-                  <span>Blocked Users</span>
-                  <span class="font-semibold text-rose-400">{{ blockedUsers }} / {{ totalUsers }}</span>
-                </div>
-                <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    class="h-full bg-rose-500 rounded-full transition-all duration-700"
-                    [style.width.%]="totalUsers > 0 ? (blockedUsers / totalUsers * 100) : 0"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Financial Insights (real data) -->
-          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <h3 class="text-sm font-semibold text-zinc-200 mb-4">Financial Insights</h3>
-            <div class="space-y-3">
-
-              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
-                <span class="text-sm text-zinc-400">Total Transaction Volume</span>
-                <span class="text-sm font-semibold text-emerald-300">
-                  ₹{{ (walletStats?.totalVolume ?? 0) | number:'1.2-2' }}
-                </span>
-              </div>
-
-              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
-                <span class="text-sm text-zinc-400">Today's Volume</span>
-                <span class="text-sm font-semibold text-amber-300">
-                  ₹{{ (walletStats?.todaysVolume ?? 0) | number:'1.2-2' }}
-                </span>
-              </div>
-
-              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
-                <span class="text-sm text-zinc-400">Total Transactions</span>
-                <span class="text-sm font-semibold text-sky-300">
-                  {{ (walletStats?.totalTransactionCount ?? 0) | number }}
-                </span>
-              </div>
-
-              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
-                <span class="text-sm text-zinc-400">Today's Transactions</span>
-                <span class="text-sm font-semibold text-zinc-200">
-                  {{ (walletStats?.todaysTransactionCount ?? 0) | number }}
-                </span>
-              </div>
-
-              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
-                <span class="text-sm text-zinc-400">Avg. Transaction Value</span>
-                <span class="text-sm font-semibold text-zinc-200">
-                  ₹{{ (walletStats?.averageTransactionValue ?? 0) | number:'1.2-2' }}
-                </span>
-              </div>
-
-              <div class="flex items-center justify-between py-2">
-                <span class="text-sm text-zinc-400">Failed Transactions</span>
-                <span class="text-sm font-semibold"
-                  [class.text-rose-400]="(walletStats?.failedTransactions ?? 0) > 0"
-                  [class.text-zinc-500]="(walletStats?.failedTransactions ?? 0) === 0">
-                  {{ (walletStats?.failedTransactions ?? 0) | number }}
-                </span>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-      }
-    </div>
-  `,
 })
 export class AdminOverviewComponent implements OnInit {
   loading = true;
@@ -249,6 +52,7 @@ export class AdminOverviewComponent implements OnInit {
 
   constructor(private readonly adminService: AdminService) {}
 
+  // Load the overview metrics in parallel and derive the secondary dashboard summaries from them.
   ngOnInit(): void {
     forkJoin({
       stats:       this.adminService.getDashboardStats().pipe(catchError(() => of(null))),
@@ -261,6 +65,7 @@ export class AdminOverviewComponent implements OnInit {
       this.stats       = stats as AdminDashboardStatsDto | null;
       this.walletStats = walletStats as WalletAdminStatsDto | null;
 
+      // Derive user activity and ticket totals from the fallback-safe response payloads.
       const userList = users as UserDto[];
       this.totalUsers  = userList.length;
       this.activeUsers = userList.filter((u) => u.isActive).length;
@@ -274,11 +79,13 @@ export class AdminOverviewComponent implements OnInit {
     });
   }
 
+  // Build a six-month registration trend used by the overview chart.
   private buildRegistrationTrend(users: UserDto[]): void {
     const now = new Date();
     const months: TrendBar[] = [];
 
     for (let i = 5; i >= 0; i--) {
+      // Seed the chart with the current month plus the previous five months.
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       months.push({
         label: d.toLocaleString('default', { month: 'short' }),
@@ -289,6 +96,7 @@ export class AdminOverviewComponent implements OnInit {
     }
 
     users.forEach((u) => {
+      // Bucket each user into the matching month slot when it falls within the visible range.
       const created = new Date(u.createdAt);
       const monthsAgo =
         (now.getFullYear() - created.getFullYear()) * 12 +
@@ -298,6 +106,7 @@ export class AdminOverviewComponent implements OnInit {
       }
     });
 
+    // Convert raw monthly counts into percentages and pixel heights for the bar chart.
     const maxCount = Math.max(...months.map((m) => m.count), 1);
     this.registrationTrend = months.map((m) => ({
       ...m,
@@ -306,6 +115,7 @@ export class AdminOverviewComponent implements OnInit {
     }));
   }
 
+  // Calculate the daily KYC approval percentage for the summary card.
   private buildKycApprovalRate(): void {
     if (!this.stats) return;
     const total = this.stats.approvedKYCToday + this.stats.rejectedKYCToday;
@@ -313,6 +123,7 @@ export class AdminOverviewComponent implements OnInit {
       total === 0 ? 0 : Math.round((this.stats.approvedKYCToday / total) * 100);
   }
 
+  // Assemble the admin stat cards from both dashboard and wallet metrics.
   private buildStatCards(): void {
     const s = this.stats;
     const w = this.walletStats;

@@ -77,24 +77,28 @@ interface AdminCatalogApiDto {
 export class AdminService {
   constructor(private readonly api: ApiService) {}
 
+  // Load pending KYC reviews and map them into the admin UI model.
   getPendingKyc(): Observable<KycReviewDto[]> {
     return this.api
       .get<PaginatedResult<AdminKycApiDto>>('/api/admin/kyc/pending')
       .pipe(map((result) => (result.items ?? []).map((item) => this.mapKycReview(item))));
   }
 
+  // Approve one KYC review and forward the optional admin note to the backend.
   approveKyc(reviewId: string, payload: KycActionRequest): Observable<unknown> {
     return this.api.post<unknown>(`/api/admin/kyc/${reviewId}/approve`, {
       notes: payload.adminNote ?? '',
     });
   }
 
+  // Reject one KYC review and forward the admin reason to the backend.
   rejectKyc(reviewId: string, payload: KycActionRequest): Observable<unknown> {
     return this.api.post<unknown>(`/api/admin/kyc/${reviewId}/reject`, {
       reason: payload.adminNote ?? '',
     });
   }
 
+  // Load admin ticket summaries, optionally filtered by status.
   getTickets(status?: string): Observable<TicketSummaryDto[]> {
     return this.api
       .get<PaginatedResult<TicketSummaryDto>>('/api/support/admin/tickets', {
@@ -103,28 +107,34 @@ export class AdminService {
       .pipe(map((result) => result.items ?? []));
   }
 
+  // Load a single ticket with reply details for the admin detail drawer.
   getTicket(ticketId: string): Observable<TicketDetailDto> {
     return this.api
       .get<SupportTicketApiDto>(`/api/support/admin/tickets/${ticketId}`)
       .pipe(map((ticket) => this.mapTicketDetail(ticket)));
   }
 
+  // Post an admin reply to the selected support ticket.
   replyToTicket(ticketId: string, reply: string): Observable<unknown> {
     return this.api.post<unknown>(`/api/support/admin/tickets/${ticketId}/replies`, { message: reply });
   }
 
+  // Move a support ticket into the closed state.
   closeTicket(ticketId: string): Observable<unknown> {
     return this.api.patch<unknown>(`/api/support/admin/tickets/${ticketId}/status`, { status: 'Closed' });
   }
 
+  // Load all users for the admin user management screen.
   getUsers(): Observable<UserDto[]> {
     return this.api.get<UserDto[]>('/api/auth/admin/users');
   }
 
+  // Toggle a user's active state from the admin users screen.
   updateUserStatus(userId: string, isActive: boolean): Observable<UserDto> {
     return this.api.patch<UserDto>(`/api/auth/admin/users/${userId}/status`, { isActive });
   }
 
+  // Reuse the public catalog endpoint and remap its fields for admin editing.
   getCatalogItems(): Observable<CatalogAdminItemDto[]> {
     return this.api
       .get<CatalogItemDto[]>('/api/rewards/catalog')
@@ -142,6 +152,7 @@ export class AdminService {
       );
   }
 
+  // Create a new catalog item using the admin catalog payload shape.
   createCatalogItem(payload: CreateCatalogItemRequest): Observable<CatalogAdminItemDto> {
     return this.api
       .post<AdminCatalogApiDto>('/api/admin/rewards/catalog', {
@@ -164,6 +175,7 @@ export class AdminService {
       );
   }
 
+  // Persist admin edits to an existing catalog item and map the response back into the table model.
   updateCatalogItem(itemId: string, payload: UpdateCatalogItemRequest): Observable<CatalogAdminItemDto> {
     return this.api
       .put<AdminCatalogApiDto>(`/api/admin/rewards/catalog/${itemId}`, {
@@ -185,14 +197,17 @@ export class AdminService {
       );
   }
 
+  // Delete one catalog item from the admin catalog table.
   deleteCatalogItem(itemId: string): Observable<null> {
     return this.api.delete<null>(`/api/admin/rewards/catalog/${itemId}`);
   }
 
+  // Load the high-level admin dashboard metrics cards.
   getDashboardStats(): Observable<AdminDashboardStatsDto> {
     return this.api.get<AdminDashboardStatsDto>('/api/admin/dashboard');
   }
 
+  // Load paginated support tickets with the current admin filters applied.
   getTicketsPaginated(params: TicketQueryParams): Observable<PaginatedResult<TicketSummaryDto>> {
     return this.api.get<PaginatedResult<TicketSummaryDto>>('/api/support/admin/tickets', {
       ...(params.status   ? { status:   params.status }   : {}),
@@ -203,14 +218,17 @@ export class AdminService {
     });
   }
 
+  // Load wallet usage and balance metrics for the admin overview.
   getWalletStats(): Observable<WalletAdminStatsDto> {
     return this.api.get<WalletAdminStatsDto>('/api/admin/wallet/stats');
   }
 
+  // Load editable notification templates for the admin notifications page.
   getNotificationTemplates(): Observable<NotificationTemplateDto[]> {
     return this.api.get<NotificationTemplateDto[]>('/api/notifications/templates');
   }
 
+  // Persist edits made to one notification template.
   updateNotificationTemplate(
     id: string,
     payload: UpdateNotificationTemplateRequest,
@@ -218,6 +236,7 @@ export class AdminService {
     return this.api.put<NotificationTemplateDto>(`/api/notifications/templates/${id}`, payload);
   }
 
+  // Adapt the KYC API shape into the fields expected by the review table.
   private mapKycReview(item: AdminKycApiDto): KycReviewDto {
     return {
       id: item.id,
@@ -233,6 +252,7 @@ export class AdminService {
     };
   }
 
+  // Extract the latest admin response and normalize ticket detail data for the UI.
   private mapTicketDetail(ticket: SupportTicketApiDto): TicketDetailDto {
     const adminReplies = (ticket.replies ?? []).filter((reply) => reply.authorRole === 'Admin');
     const latestAdminReply = adminReplies.at(-1) ?? null;

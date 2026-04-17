@@ -16,10 +16,12 @@ export interface RedeemResponseDto {
 export class CatalogService {
   constructor(private readonly api: ApiService) {}
 
+  // Load the available rewards catalog for the redemption screen.
   getCatalog(): Observable<CatalogItemDto[]> {
     return this.api.get<CatalogItemDto[]>('/api/rewards/catalog');
   }
 
+  // Redeem a selected catalog item and return the fulfillment details.
   redeem(catalogItemId: string): Observable<RedeemResponseDto> {
     return this.api.post<RedeemResponseDto>('/api/rewards/redeem', {
       catalogItemId,

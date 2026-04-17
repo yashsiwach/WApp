@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ProjectWallet — Database Schema Diagram</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f172a; --card:#1e293b; --card2:#16213e;
+  --border:#334155; --text:#f1f5f9; --muted:#94a3b8; --dim:#64748b;
+  --pk:#fbbf24; --fk:#f87171; --uq:#22d3ee; --field:#e2e8f0; --type:#64748b;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;padding:32px 20px 60px;min-width:900px}
+
+/* ── HEADER ── */
+.page-title{text-align:center;font-size:2rem;font-weight:700;letter-spacing:.03em;margin-bottom:6px}
+.page-sub{text-align:center;font-size:.85rem;color:var(--muted);margin-bottom:10px}
+.legend-bar{display:flex;flex-wrap:wrap;justify-content:center;gap:18px;margin-bottom:36px;padding:12px 20px;background:var(--card);border:1px solid var(--border);border-radius:10px;max-width:860px;margin-left:auto;margin-right:auto}
+.leg{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--muted)}
+.leg-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700;letter-spacing:.04em}
+
+/* ── NAV TABS ── */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:30px}
+.tab{padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);
+     color:var(--muted);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.03em}
+.tab:hover{transform:translateY(-1px)}
+.tab.active{color:#fff}
+
+/* ── SERVICE SECTION ── */
+.svc-section{display:none;animation:fadeIn .25s ease}
+.svc-section.visible{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.svc-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.svc-dot{width:14px;height:14px;border-radius:50%}
+.svc-title{font-size:1.2rem;font-weight:700}
+.svc-db{font-size:.78rem;color:var(--muted);margin-top:2px}
+
+/* ── TABLE GRID ── */
+.tables-grid{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+
+/* ── ENTITY TABLE ── */
+.entity{border-radius:10px;border:1.5px solid;min-width:300px;max-width:400px;flex:1;overflow:hidden;
+        transition:transform .15s,box-shadow .15s}
+.entity:hover{transform:translateY(-3px)}
+
+.entity-header{padding:11px 14px 10px;font-weight:700;font-size:.92rem;display:flex;justify-content:space-between;align-items:center}
+.entity-header .tbl-name{}
+.entity-header .row-count{font-size:.68rem;font-weight:500;opacity:.7}
+
+.col-header{display:grid;grid-template-columns:1fr 100px 44px;padding:5px 10px;font-size:.65rem;
+            font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--border);color:var(--muted)}
+
+.field-row{display:grid;grid-template-columns:1fr 100px 44px;padding:5px 10px;font-size:.75rem;
+           border-bottom:1px solid var(--border);transition:background .12s;align-items:center}
+.field-row:last-child{border-bottom:none}
+.field-row:hover{background:rgba(255,255,255,.04)}
+.field-row.alt{background:rgba(15,33,62,.45)}
+
+.fname{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fname.is-pk{color:var(--pk);font-weight:700}
+.fname.is-fk{color:var(--fk);font-style:italic}
+.fname.is-uq{color:var(--uq)}
+
+.ftype{color:var(--type);font-size:.7rem}
+.fbadge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:.6rem;font-weight:700;letter-spacing:.04em;text-align:center}
+.badge-pk{background:#78350f;color:var(--pk)}
+.badge-fk{background:#450a0a;color:var(--fk)}
+.badge-uq{background:#0e4f5c;color:var(--uq)}
+
+/* ── FK RELATIONSHIP CONNECTOR (visual text) ── */
+.fk-note{font-size:.65rem;color:var(--dim);padding-left:4px}
+
+/* ── ENUMS SECTION ── */
+.enums-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.enum-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.enum-name{color:var(--pk);font-weight:700;font-size:.85rem;margin-bottom:6px}
+.enum-values{font-size:.74rem;color:var(--muted);line-height:1.8;display:flex;flex-wrap:wrap;gap:4px}
+.enum-val{background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:1px 7px;font-size:.7rem;color:var(--field)}
+
+/* ── CROSS-SERVICE TABLE ── */
+.xref-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.xref-table th{background:var(--border);color:var(--muted);font-size:.7rem;text-transform:uppercase;
+               letter-spacing:.05em;padding:8px 12px;text-align:left;font-weight:700}
+.xref-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.xref-table tr:nth-child(even) td{background:var(--card2)}
+.xref-table tr:hover td{background:rgba(255,255,255,.04)}
+.svc-chip{display:inline-block;padding:2px 9px;border-radius:5px;font-size:.68rem;font-weight:700;border:1px solid}
+.note-txt{color:var(--muted);font-size:.72rem}
+.arrow{color:var(--dim);margin:0 4px}
+
+/* ── SECTION WRAPPER ── */
+.section{max-width:1280px;margin:0 auto 48px}
+.section-label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+               color:var(--dim);margin-bottom:12px;padding-left:2px}
+
+/* ── MONGODB BADGE ── */
+.mongo-note{display:inline-block;background:#0d2210;border:1px solid #16a34a;border-radius:6px;
+            padding:3px 10px;font-size:.7rem;color:#4ade80;margin-bottom:12px}
+
+/* ── SCROLLSPY / STICKY TABS ── */
+.sticky-tabs{position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 0 10px;
+             border-bottom:1px solid var(--border);margin-bottom:24px}
+
+/* ── SERVICE COLOURS ── */
+/* AuthService */
+.ent-auth   {border-color:#3b82f6} .ent-auth   .entity-header{background:#1e3a5f;color:#93c5fd}
+.tab-auth   {border-color:#3b82f6} .tab-auth.active{background:#1e3a5f;color:#93c5fd;border-color:#3b82f6}
+.dot-auth   {background:#3b82f6}   .chip-auth  {background:#1e3a5f;border-color:#3b82f6;color:#93c5fd}
+/* WalletService */
+.ent-wallet {border-color:#22c55e} .ent-wallet .entity-header{background:#14532d;color:#86efac}
+.tab-wallet {border-color:#22c55e} .tab-wallet.active{background:#14532d;color:#86efac;border-color:#22c55e}
+.dot-wallet {background:#22c55e}   .chip-wallet{background:#14532d;border-color:#22c55e;color:#86efac}
+/* PaymentService */
+.ent-payment{border-color:#f59e0b} .ent-payment .entity-header{background:#451a03;color:#fde68a}
+.tab-payment{border-color:#f59e0b} .tab-payment.active{background:#451a03;color:#fde68a;border-color:#f59e0b}
+.dot-payment{background:#f59e0b}   .chip-payment{background:#451a03;border-color:#f59e0b;color:#fde68a}
+/* AdminService */
+.ent-admin  {border-color:#ef4444} .ent-admin  .entity-header{background:#450a0a;color:#fca5a5}
+.tab-admin  {border-color:#ef4444} .tab-admin.active{background:#450a0a;color:#fca5a5;border-color:#ef4444}
+.dot-admin  {background:#ef4444}   .chip-admin {background:#450a0a;border-color:#ef4444;color:#fca5a5}
+/* RewardService */
+.ent-reward {border-color:#d946ef} .ent-reward .entity-header{background:#4a044e;color:#f0abfc}
+.tab-reward {border-color:#d946ef} .tab-reward.active{background:#4a044e;color:#f0abfc;border-color:#d946ef}
+.dot-reward {background:#d946ef}   .chip-reward{background:#4a044e;border-color:#d946ef;color:#f0abfc}
+/* NotificationService */
+.ent-notif  {border-color:#818cf8} .ent-notif  .entity-header{background:#1e1b4b;color:#c7d2fe}
+.tab-notif  {border-color:#818cf8} .tab-notif.active{background:#1e1b4b;color:#c7d2fe;border-color:#818cf8}
+.dot-notif  {background:#818cf8}   .chip-notif {background:#1e1b4b;border-color:#818cf8;color:#c7d2fe}
+
+/* ── TOOLTIP ── */
+[data-tip]{position:relative;cursor:default}
+[data-tip]:hover::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;
+  transform:translateX(-50%);background:#1e293b;border:1px solid #475569;
+  border-radius:7px;padding:7px 11px;font-size:.7rem;color:#e2e8f0;
+  white-space:pre-line;z-index:200;min-width:160px;line-height:1.7;
+  pointer-events:none;box-shadow:0 8px 24px #00000070
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<h1 class="page-title">ProjectWallet — Database Schema</h1>
+<p class="page-sub">.NET 8 · Entity Framework Core 8 · SQL Server (SQLEXPRESS) · MongoDB Atlas · 6 Microservice Databases</p>
+
+<div class="legend-bar">
+  <div class="leg"><span class="leg-badge badge-pk">PK</span> Primary Key</div>
+  <div class="leg"><span class="leg-badge badge-fk">FK</span> Foreign Key</div>
+  <div class="leg"><span class="leg-badge badge-uq">UQ</span> Unique Constraint</div>
+  <div class="leg" style="color:#e2e8f0">&#9632; Regular field</div>
+  <div class="leg" style="color:var(--type)">&#9632; Data type column</div>
+  <div class="leg" style="color:var(--dim)">All monetary decimals: precision (18,4)</div>
+  <div class="leg" style="color:var(--dim)">All PKs: Guid (auto-generated)</div>
+  <div class="leg" style="color:var(--dim)">Soft delete: IsDeleted on all tables</div>
+</div>
+
+<!-- ── TABS ── -->
+<div class="sticky-tabs">
+  <div class="tabs">
+    <div class="tab tab-auth   active" onclick="show('auth')">&#128272; AuthService</div>
+    <div class="tab tab-wallet"        onclick="show('wallet')">&#128181; WalletService</div>
+    <div class="tab tab-payment"       onclick="show('payment')">&#128179; PaymentService</div>
+    <div class="tab tab-admin"         onclick="show('admin')">&#128736; AdminService</div>
+    <div class="tab tab-reward"        onclick="show('reward')">&#127881; RewardService</div>
+    <div class="tab tab-notif"         onclick="show('notif')">&#128276; NotificationService</div>
+    <div class="tab"                   onclick="show('enums')" style="border-color:#fbbf24">&#128196; Enums</div>
+    <div class="tab"                   onclick="show('xref')"  style="border-color:#475569">&#128279; Cross-Service</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     AUTH SERVICE
+════════════════════════════════════════════════════════ -->
+<div id="svc-auth" class="svc-section section visible">
+  <div class="svc-header">
+    <div class="svc-dot dot-auth"></div>
+    <div>
+      <div class="svc-title">AuthService</div>
+      <div class="svc-db">Database: <strong>WalletAuth</strong> &nbsp;·&nbsp; SQL Server (SQLEXPRESS) &nbsp;·&nbsp; 3 Tables</div>
+    </div>
+  </div>
+
+  <div class="tables-grid">
+
+    <!-- Users -->
+    <div class="entity ent-auth">
+      <div class="entity-header">
+        <span class="tbl-name">Users</span>
+        <span class="row-count">13 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname">FullName</span><span class="ftype">string(200)</span><span></span></div>
+      <div class="field-row"><span class="fname is-uq">Email</span><span class="ftype">string(256)</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row alt"><span class="fname is-uq">PhoneNumber</span><span class="ftype">string(20)</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row"><span class="fname">PasswordHash</span><span class="ftype">string</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Role</span><span class="ftype">UserRole (enum)</span><span></span></div>
+      <div class="field-row"><span class="fname">Status</span><span class="ftype">UserStatus (enum)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">LastLoginAt</span><span class="ftype">DateTime?</span><span></span></div>
+      <div class="field-row"><span class="fname">CreatedBy</span><span class="ftype">Guid?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">UpdatedBy</span><span class="ftype">Guid?</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- KycDocuments -->
+    <div class="entity ent-auth">
+      <div class="entity-header">
+        <span class="tbl-name">KycDocuments</span>
+        <span class="row-count">13 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname is-fk" data-tip="FK → Users.Id (Cascade delete)&#10;Unique — one KYC per user">UserId</span><span class="ftype">Guid</span><span><span class="fbadge badge-fk">FK</span></span></div>
+      <div class="field-row"><span class="fname">DocumentType</span><span class="ftype">DocumentType</span><span></span></div>
+      <div class="field-row alt"><span class="fname">DocumentNumber</span><span class="ftype">string(100)</span><span></span></div>
+      <div class="field-row"><span class="fname">DocumentUrl</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Status</span><span class="ftype">KycStatus</span><span></span></div>
+      <div class="field-row"><span class="fname">AdminNote</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">ReviewedBy</span><span class="ftype">Guid?</span><span></span></div>
+      <div class="field-row"><span class="fname">AttemptNumber</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row alt"><span class="fname">ReviewedAt</span><span class="ftype">DateTime?</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- UserSessions -->
+    <div class="entity ent-auth">
+      <div class="entity-header">
+        <span class="tbl-name">UserSessions</span>
+        <span class="row-count">11 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname is-fk" data-tip="FK → Users.Id (Cascade delete)&#10;Many sessions per user">UserId</span><span class="ftype">Guid</span><span><span class="fbadge badge-fk">FK</span></span></div>
+      <div class="field-row"><span class="fname is-uq">RefreshToken</span><span class="ftype">string(500)</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row alt"><span class="fname">DeviceInfo</span><span class="ftype">string(200)?</span><span></span></div>
+      <div class="field-row"><span class="fname">IpAddress</span><span class="ftype">string(50)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">IsRevoked</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row"><span class="fname">RevokedReason</span><span class="ftype">string(100)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">ExpiresAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+  </div>
+
+  <!-- Relationships -->
+  <div style="margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.78rem;color:var(--muted)">
+    <strong style="color:var(--text)">Intra-database relationships</strong><br>
+    <span style="color:var(--fk)">KycDocuments.UserId</span> &#8594; <span style="color:var(--pk)">Users.Id</span> &nbsp;(1:1, Cascade delete, Unique)<br>
+    <span style="color:var(--fk)">UserSessions.UserId</span> &#8594; <span style="color:var(--pk)">Users.Id</span> &nbsp;(1:N, Cascade delete)<br>
+    <br><strong style="color:var(--text)">Indexes</strong>: Users(Email), Users(PhoneNumber), Users(Status), KycDocuments(UserId), KycDocuments(Status), UserSessions(RefreshToken), UserSessions(UserId), UserSessions(ExpiresAt)
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     WALLET SERVICE
+════════════════════════════════════════════════════════ -->
+<div id="svc-wallet" class="svc-section section">
+  <div class="svc-header">
+    <div class="svc-dot dot-wallet"></div>
+    <div>
+      <div class="svc-title">WalletService</div>
+      <div class="svc-db">Database: <strong>WalletWallet</strong> &nbsp;·&nbsp; SQL Server (SQLEXPRESS) &nbsp;·&nbsp; 3 Tables</div>
+    </div>
+  </div>
+
+  <div class="tables-grid">
+
+    <!-- Wallets -->
+    <div class="entity ent-wallet">
+      <div class="entity-header">
+        <span class="tbl-name">Wallets</span>
+        <span class="row-count">13 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname is-uq" data-tip="Unique per user (with soft-delete filter)">UserId</span><span class="ftype">Guid</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row"><span class="fname is-uq">WalletNumber</span><span class="ftype">string(20)</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row alt"><span class="fname">Balance</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">Currency</span><span class="ftype">Currency (enum)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Status</span><span class="ftype">WalletStatus</span><span></span></div>
+      <div class="field-row"><span class="fname">DailyLimit</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">MonthlyLimit</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">LockedAt</span><span class="ftype">DateTime?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">LockedReason</span><span class="ftype">string(200)?</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- WalletTransactions -->
+    <div class="entity ent-wallet">
+      <div class="entity-header">
+        <span class="tbl-name">WalletTransactions</span>
+        <span class="row-count">17 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname is-fk" data-tip="FK → Wallets.Id (Restrict delete)&#10;Many transactions per wallet">WalletId</span><span class="ftype">Guid</span><span><span class="fbadge badge-fk">FK</span></span></div>
+      <div class="field-row"><span class="fname">ToWalletId</span><span class="ftype">Guid?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">TransactionType</span><span class="ftype">TransactionType</span><span></span></div>
+      <div class="field-row"><span class="fname">Amount</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Fee</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">BalanceBefore</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">BalanceAfter</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">Status</span><span class="ftype">TxnStatus</span><span></span></div>
+      <div class="field-row alt"><span class="fname is-uq">ReferenceNumber</span><span class="ftype">string(100)</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row"><span class="fname is-uq">IdempotencyKey</span><span class="ftype">string(100)?</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row alt"><span class="fname">Note</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row"><span class="fname">Description</span><span class="ftype">string(200)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">FailureReason</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- DailyTransactionSummaries -->
+    <div class="entity ent-wallet">
+      <div class="entity-header">
+        <span class="tbl-name">DailyTransactionSummaries</span>
+        <span class="row-count">10 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname is-fk" data-tip="FK → Wallets.Id (Cascade delete)&#10;Composite UQ: (WalletId, SummaryDate)">WalletId</span><span class="ftype">Guid</span><span><span class="fbadge badge-fk">FK</span></span></div>
+      <div class="field-row"><span class="fname">SummaryDate</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row alt"><span class="fname">TotalSent</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">TotalReceived</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">TotalTopUp</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">TransactionCount</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row alt"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row alt"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.78rem;color:var(--muted)">
+    <strong style="color:var(--text)">Intra-database relationships</strong><br>
+    <span style="color:var(--fk)">WalletTransactions.WalletId</span> &#8594; <span style="color:var(--pk)">Wallets.Id</span> &nbsp;(1:N, Restrict delete)<br>
+    <span style="color:var(--fk)">DailyTransactionSummaries.WalletId</span> &#8594; <span style="color:var(--pk)">Wallets.Id</span> &nbsp;(1:N, Cascade delete)<br>
+    <br><strong style="color:var(--text)">Composite Unique Index</strong>: DailyTransactionSummaries(WalletId, SummaryDate)<br>
+    <strong style="color:var(--text)">Indexes</strong>: Wallets(UserId, WalletNumber, Status), WalletTransactions(ReferenceNumber, IdempotencyKey, WalletId, CreatedAt)
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     PAYMENT SERVICE
+════════════════════════════════════════════════════════ -->
+<div id="svc-payment" class="svc-section section">
+  <div class="svc-header">
+    <div class="svc-dot dot-payment"></div>
+    <div>
+      <div class="svc-title">PaymentService</div>
+      <div class="svc-db">Database: <strong>WalletPayment</strong> &nbsp;·&nbsp; SQL Server (SQLEXPRESS) &nbsp;·&nbsp; 2 Tables &nbsp;·&nbsp; Min: ₹1 / Max: ₹1,00,000</div>
+    </div>
+  </div>
+
+  <div class="tables-grid">
+
+    <!-- Payments -->
+    <div class="entity ent-payment">
+      <div class="entity-header">
+        <span class="tbl-name">Payments</span>
+        <span class="row-count">19 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname">UserId</span><span class="ftype">Guid</span><span></span></div>
+      <div class="field-row"><span class="fname">WalletId</span><span class="ftype">Guid</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Amount</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">Fee</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">NetAmount</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">PaymentType</span><span class="ftype">PaymentType</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Status</span><span class="ftype">PaymentStatus</span><span></span></div>
+      <div class="field-row"><span class="fname">GatewayReference</span><span class="ftype">string(200)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">GatewayProvider</span><span class="ftype">PaymentGateway</span><span></span></div>
+      <div class="field-row"><span class="fname">GatewayResponse</span><span class="ftype">string?</span><span></span></div>
+      <div class="field-row alt"><span class="fname is-uq">IdempotencyKey</span><span class="ftype">string(100)?</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row"><span class="fname">Note</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">FailureReason</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row"><span class="fname">RetryCount</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CompletedAt</span><span class="ftype">DateTime?</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- PaymentRefunds -->
+    <div class="entity ent-payment">
+      <div class="entity-header">
+        <span class="tbl-name">PaymentRefunds</span>
+        <span class="row-count">11 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname is-fk" data-tip="FK → Payments.Id (Restrict delete)&#10;Many refunds per payment">OriginalPaymentId</span><span class="ftype">Guid</span><span><span class="fbadge badge-fk">FK</span></span></div>
+      <div class="field-row"><span class="fname">UserId</span><span class="ftype">Guid</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Amount</span><span class="ftype">decimal(18,4)</span><span></span></div>
+      <div class="field-row"><span class="fname">Reason</span><span class="ftype">string(500)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Status</span><span class="ftype">PaymentStatus</span><span></span></div>
+      <div class="field-row"><span class="fname">ProcessedBy</span><span class="ftype">Guid?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">ProcessedAt</span><span class="ftype">DateTime?</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.78rem;color:var(--muted)">
+    <strong style="color:var(--text)">Intra-database relationships</strong><br>
+    <span style="color:var(--fk)">PaymentRefunds.OriginalPaymentId</span> &#8594; <span style="color:var(--pk)">Payments.Id</span> &nbsp;(1:N, Restrict delete)<br>
+    <br><strong style="color:var(--text)">Indexes</strong>: Payments(IdempotencyKey), Payments(UserId), Payments(Status), PaymentRefunds(OriginalPaymentId), PaymentRefunds(UserId)
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     ADMIN SERVICE
+════════════════════════════════════════════════════════ -->
+<div id="svc-admin" class="svc-section section">
+  <div class="svc-header">
+    <div class="svc-dot dot-admin"></div>
+    <div>
+      <div class="svc-title">AdminService</div>
+      <div class="svc-db">Database: <strong>WalletAdmin</strong> &nbsp;·&nbsp; SQL Server (SQLEXPRESS) &nbsp;·&nbsp; 3 Tables</div>
+    </div>
+  </div>
+
+  <div class="tables-grid">
+
+    <!-- KycReviews -->
+    <div class="entity ent-admin">
+      <div class="entity-header">
+        <span class="tbl-name">KycReviews</span>
+        <span class="row-count">14 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname is-uq" data-tip="Unique — mirrors AuthService KycDocuments.UserId&#10;Updated via RabbitMQ kyc_submitted event">UserId</span><span class="ftype">Guid</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row"><span class="fname">UserFullName</span><span class="ftype">string(200)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">UserEmail</span><span class="ftype">string(256)</span><span></span></div>
+      <div class="field-row"><span class="fname">DocumentType</span><span class="ftype">DocumentType</span><span></span></div>
+      <div class="field-row alt"><span class="fname">DocumentNumber</span><span class="ftype">string(100)</span><span></span></div>
+      <div class="field-row"><span class="fname">Status</span><span class="ftype">KycReviewStatus</span><span></span></div>
+      <div class="field-row alt"><span class="fname">AdminNote</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row"><span class="fname">ReviewedBy</span><span class="ftype">Guid?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Priority</span><span class="ftype">KycReviewPriority</span><span></span></div>
+      <div class="field-row"><span class="fname">ReviewedAt</span><span class="ftype">DateTime?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row alt"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- SupportTickets -->
+    <div class="entity ent-admin">
+      <div class="entity-header">
+        <span class="tbl-name">SupportTickets</span>
+        <span class="row-count">18 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname">UserId</span><span class="ftype">Guid</span><span></span></div>
+      <div class="field-row"><span class="fname">UserEmail</span><span class="ftype">string(256)</span><span></span></div>
+      <div class="field-row alt"><span class="fname is-uq">TicketNumber</span><span class="ftype">string(20)</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row"><span class="fname">Subject</span><span class="ftype">string(300)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Message</span><span class="ftype">string</span><span></span></div>
+      <div class="field-row"><span class="fname">Category</span><span class="ftype">TicketCategory</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Status</span><span class="ftype">TicketStatus</span><span></span></div>
+      <div class="field-row"><span class="fname">Priority</span><span class="ftype">TicketPriority</span><span></span></div>
+      <div class="field-row alt"><span class="fname">AdminReply</span><span class="ftype">string?</span><span></span></div>
+      <div class="field-row"><span class="fname">RespondedBy</span><span class="ftype">Guid?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">AssignedTo</span><span class="ftype">Guid?</span><span></span></div>
+      <div class="field-row"><span class="fname">RespondedAt</span><span class="ftype">DateTime?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">ClosedAt</span><span class="ftype">DateTime?</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- AdminAuditLogs -->
+    <div class="entity ent-admin">
+      <div class="entity-header">
+        <span class="tbl-name">AdminAuditLogs</span>
+        <span class="row-count">13 columns &nbsp;·&nbsp; permanent</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname">AdminId</span><span class="ftype">Guid</span><span></span></div>
+      <div class="field-row"><span class="fname">AdminEmail</span><span class="ftype">string(256)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Action</span><span class="ftype">string(100)</span><span></span></div>
+      <div class="field-row"><span class="fname">EntityType</span><span class="ftype">string(50)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">EntityId</span><span class="ftype">Guid</span><span></span></div>
+      <div class="field-row"><span class="fname">OldValues</span><span class="ftype">string?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">NewValues</span><span class="ftype">string?</span><span></span></div>
+      <div class="field-row"><span class="fname">IpAddress</span><span class="ftype">string(50)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Notes</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.78rem;color:var(--muted)">
+    <strong style="color:var(--text)">Notes</strong><br>
+    AdminAuditLogs has <em>no</em> global soft-delete query filter — audit records are permanent.<br>
+    KycReviews is populated via RabbitMQ <code>kyc_submitted</code> event from AuthService.<br>
+    <br><strong style="color:var(--text)">Indexes</strong>: KycReviews(UserId, Status), SupportTickets(TicketNumber, UserId, Status), AdminAuditLogs(AdminId, EntityId, Action, CreatedAt)
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     REWARD SERVICE
+════════════════════════════════════════════════════════ -->
+<div id="svc-reward" class="svc-section section">
+  <div class="svc-header">
+    <div class="svc-dot dot-reward"></div>
+    <div>
+      <div class="svc-title">RewardService</div>
+      <div class="svc-db">Database: <strong>WalletReward</strong> &nbsp;·&nbsp; SQL Server (SQLEXPRESS) &nbsp;·&nbsp; 4 Tables &nbsp;·&nbsp; Tiers: Bronze → Silver → Gold → Platinum</div>
+    </div>
+  </div>
+
+  <div class="tables-grid">
+
+    <!-- Rewards -->
+    <div class="entity ent-reward">
+      <div class="entity-header">
+        <span class="tbl-name">Rewards</span>
+        <span class="row-count">8 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname is-uq" data-tip="Unique per user — one reward account per user">UserId</span><span class="ftype">Guid</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row"><span class="fname">PointsBalance</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row alt"><span class="fname">TotalEarned</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row"><span class="fname">Tier</span><span class="ftype">RewardTier</span><span></span></div>
+      <div class="field-row alt"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row alt"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- RewardTransactions -->
+    <div class="entity ent-reward">
+      <div class="entity-header">
+        <span class="tbl-name">RewardTransactions</span>
+        <span class="row-count">8 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname">UserId</span><span class="ftype">Guid</span><span></span></div>
+      <div class="field-row"><span class="fname">Points</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Reason</span><span class="ftype">string(100)</span><span></span></div>
+      <div class="field-row"><span class="fname is-uq" data-tip="Composite UQ: (UserId, Reference)&#10;Prevents duplicate reward on same transaction">Reference</span><span class="ftype">string(100)</span><span><span class="fbadge badge-uq">UQ</span></span></div>
+      <div class="field-row alt"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row alt"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- RewardRules -->
+    <div class="entity ent-reward">
+      <div class="entity-header">
+        <span class="tbl-name">RewardRules</span>
+        <span class="row-count">10 columns &nbsp;·&nbsp; seeded</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname">Name</span><span class="ftype">string(100)</span><span></span></div>
+      <div class="field-row"><span class="fname">Description</span><span class="ftype">string(500)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">PointsAwarded</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row"><span class="fname">ThresholdPoints</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row alt"><span class="fname">TargetTier</span><span class="ftype">RewardTier</span><span></span></div>
+      <div class="field-row"><span class="fname">IsActive</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row alt"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+    <!-- CatalogItems -->
+    <div class="entity ent-reward">
+      <div class="entity-header">
+        <span class="tbl-name">CatalogItems</span>
+        <span class="row-count">9 columns</span>
+      </div>
+      <div class="col-header"><span>Column</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">Id</span><span class="ftype">Guid</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname">Name</span><span class="ftype">string(200)</span><span></span></div>
+      <div class="field-row"><span class="fname">Description</span><span class="ftype">string(1000)?</span><span></span></div>
+      <div class="field-row alt"><span class="fname">PointsCost</span><span class="ftype">int</span><span></span></div>
+      <div class="field-row"><span class="fname">Category</span><span class="ftype">string(100)</span><span></span></div>
+      <div class="field-row alt"><span class="fname">IsActive</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row"><span class="fname">IsDeleted</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row alt"><span class="fname">CreatedAt</span><span class="ftype">DateTime</span><span></span></div>
+      <div class="field-row"><span class="fname">UpdatedAt</span><span class="ftype">DateTime</span><span></span></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.78rem;color:var(--muted)">
+    <strong style="color:var(--text)">Tier Thresholds</strong>:
+    Bronze: 0–999 pts &nbsp;·&nbsp; Silver: 1,000–4,999 pts &nbsp;·&nbsp; Gold: 5,000–14,999 pts &nbsp;·&nbsp; Platinum: 15,000+ pts<br>
+    <strong style="color:var(--text)">Composite Unique Index</strong>: RewardTransactions(UserId, Reference) — prevents duplicate rewards per wallet transaction<br>
+    <strong style="color:var(--text)">Seeded Rules</strong>: Bronze→Silver (1000 pts), Silver→Gold (5000 pts), Gold→Platinum (15000 pts)
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     NOTIFICATION SERVICE
+════════════════════════════════════════════════════════ -->
+<div id="svc-notif" class="svc-section section">
+  <div class="svc-header">
+    <div class="svc-dot dot-notif"></div>
+    <div>
+      <div class="svc-title">NotificationService</div>
+      <div class="svc-db">Database: <strong>WalletNotifications</strong> &nbsp;·&nbsp; MongoDB Atlas (Cloud) &nbsp;·&nbsp; 1 Collection</div>
+    </div>
+  </div>
+
+  <div class="mongo-note">&#127809; MongoDB — Document-based storage. No FK constraints. Uses MongoDB .NET Driver directly (no ORM).</div>
+
+  <div class="tables-grid">
+
+    <!-- notifications collection -->
+    <div class="entity ent-notif" style="max-width:360px">
+      <div class="entity-header">
+        <span class="tbl-name">notifications &nbsp;<span style="font-size:.7rem;opacity:.6">(collection)</span></span>
+        <span class="row-count">7 fields</span>
+      </div>
+      <div class="col-header"><span>Field</span><span>Type</span><span>Key</span></div>
+      <div class="field-row"><span class="fname is-pk">_id</span><span class="ftype">ObjectId</span><span><span class="fbadge badge-pk">PK</span></span></div>
+      <div class="field-row alt"><span class="fname">UserId</span><span class="ftype">string</span><span></span></div>
+      <div class="field-row"><span class="fname">Title</span><span class="ftype">string</span><span></span></div>
+      <div class="field-row alt"><span class="fname">Message</span><span class="ftype">string</span><span></span></div>
+      <div class="field-row"><span class="fname">Type</span><span class="ftype">string</span><span></span></div>
+      <div class="field-row alt"><span class="fname">IsRead</span><span class="ftype">bool</span><span></span></div>
+      <div class="field-row"><span class="fname">CreatedAt</span><span class="ftype">DateTime (UTC)</span><span></span></div>
+    </div>
+
+    <!-- info card -->
+    <div style="flex:1;min-width:280px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;font-size:.8rem;color:var(--muted);line-height:2">
+      <div style="color:var(--text);font-weight:700;margin-bottom:10px">Collection characteristics</div>
+      <div><strong style="color:#c7d2fe">Connection</strong>: MongoDB Atlas (cloud cluster)</div>
+      <div><strong style="color:#c7d2fe">DB name</strong>: WalletNotifications</div>
+      <div><strong style="color:#c7d2fe">Collection</strong>: notifications</div>
+      <div><strong style="color:#c7d2fe">Driver</strong>: MongoDB .NET Driver (no EF Core)</div>
+      <div><strong style="color:#c7d2fe">Pattern</strong>: Repository (INotificationRepository)</div>
+      <div style="margin-top:12px;color:var(--text);font-weight:700">Event types stored (Type field)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+        <span style="background:#1e1b4b;border:1px solid #818cf8;border-radius:4px;padding:2px 8px;font-size:.7rem;color:#c7d2fe">kyc_approved</span>
+        <span style="background:#1e1b4b;border:1px solid #818cf8;border-radius:4px;padding:2px 8px;font-size:.7rem;color:#c7d2fe">kyc_rejected</span>
+        <span style="background:#1e1b4b;border:1px solid #818cf8;border-radius:4px;padding:2px 8px;font-size:.7rem;color:#c7d2fe">transfer_sent</span>
+        <span style="background:#1e1b4b;border:1px solid #818cf8;border-radius:4px;padding:2px 8px;font-size:.7rem;color:#c7d2fe">transfer_received</span>
+        <span style="background:#1e1b4b;border:1px solid #818cf8;border-radius:4px;padding:2px 8px;font-size:.7rem;color:#c7d2fe">topup_success</span>
+      </div>
+      <div style="margin-top:12px;color:var(--text);font-weight:700">APIs</div>
+      <div>GET /api/notifications &nbsp;·&nbsp; paginated + unread count</div>
+      <div>PUT /api/notifications/{id}/read</div>
+      <div>PUT /api/notifications/read-all</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     ENUMS REFERENCE
+════════════════════════════════════════════════════════ -->
+<div id="svc-enums" class="svc-section section">
+  <div class="svc-header">
+    <div class="svc-dot" style="background:#fbbf24"></div>
+    <div>
+      <div class="svc-title">Enum Reference</div>
+      <div class="svc-db">All enumerations used across services · Stored as integers in SQL Server</div>
+    </div>
+  </div>
+
+  <div class="enums-grid">
+    <div class="enum-card">
+      <div class="enum-name">UserRole</div>
+      <div class="enum-values">
+        <span class="enum-val">User = 0</span><span class="enum-val">Admin = 1</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">UserStatus</div>
+      <div class="enum-values">
+        <span class="enum-val">Pending = 0</span><span class="enum-val">Active = 1</span><span class="enum-val">Rejected = 2</span><span class="enum-val">Suspended = 3</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">KycStatus</div>
+      <div class="enum-values">
+        <span class="enum-val">Pending = 0</span><span class="enum-val">Approved = 1</span><span class="enum-val">Rejected = 2</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">DocumentType</div>
+      <div class="enum-values">
+        <span class="enum-val">NationalId = 0</span><span class="enum-val">Passport = 1</span><span class="enum-val">DrivingLicense = 2</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">WalletStatus</div>
+      <div class="enum-values">
+        <span class="enum-val">Active = 0</span><span class="enum-val">Locked = 1</span><span class="enum-val">Suspended = 2</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">Currency</div>
+      <div class="enum-values">
+        <span class="enum-val">INR = 0</span><span class="enum-val">USD = 1</span><span class="enum-val">EUR = 2</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">TransactionType</div>
+      <div class="enum-values">
+        <span class="enum-val">TopUp = 0</span><span class="enum-val">TransferIn = 1</span><span class="enum-val">TransferOut = 2</span><span class="enum-val">Refund = 3</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">TxnStatus (TransactionStatus)</div>
+      <div class="enum-values">
+        <span class="enum-val">Pending = 0</span><span class="enum-val">Success = 1</span><span class="enum-val">Failed = 2</span><span class="enum-val">Reversed = 3</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">PaymentStatus</div>
+      <div class="enum-values">
+        <span class="enum-val">Pending = 0</span><span class="enum-val">Success = 1</span><span class="enum-val">Failed = 2</span><span class="enum-val">Refunded = 3</span><span class="enum-val">Cancelled = 4</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">PaymentType</div>
+      <div class="enum-values">
+        <span class="enum-val">TopUp = 0</span><span class="enum-val">Transfer = 1</span><span class="enum-val">Refund = 2</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">PaymentGateway</div>
+      <div class="enum-values">
+        <span class="enum-val">Mock = 0</span><span class="enum-val">Razorpay = 1</span><span class="enum-val">Stripe = 2</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">KycReviewStatus</div>
+      <div class="enum-values">
+        <span class="enum-val">Pending = 0</span><span class="enum-val">Approved = 1</span><span class="enum-val">Rejected = 2</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">KycReviewPriority</div>
+      <div class="enum-values">
+        <span class="enum-val">Low = 0</span><span class="enum-val">Normal = 1</span><span class="enum-val">High = 2</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">TicketStatus</div>
+      <div class="enum-values">
+        <span class="enum-val">Open = 0</span><span class="enum-val">InProgress = 1</span><span class="enum-val">Responded = 2</span><span class="enum-val">Closed = 3</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">TicketPriority</div>
+      <div class="enum-values">
+        <span class="enum-val">Low = 0</span><span class="enum-val">Medium = 1</span><span class="enum-val">High = 2</span><span class="enum-val">Urgent = 3</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">TicketCategory</div>
+      <div class="enum-values">
+        <span class="enum-val">General = 0</span><span class="enum-val">Payment = 1</span><span class="enum-val">Transfer = 2</span><span class="enum-val">Kyc = 3</span><span class="enum-val">Account = 4</span><span class="enum-val">Technical = 5</span>
+      </div>
+    </div>
+    <div class="enum-card">
+      <div class="enum-name">RewardTier</div>
+      <div class="enum-values">
+        <span class="enum-val">Bronze = 0</span><span class="enum-val">Silver = 1</span><span class="enum-val">Gold = 2</span><span class="enum-val">Platinum = 3</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     CROSS-SERVICE RELATIONSHIPS
+════════════════════════════════════════════════════════ -->
+<div id="svc-xref" class="svc-section section">
+  <div class="svc-header">
+    <div class="svc-dot" style="background:#475569"></div>
+    <div>
+      <div class="svc-title">Cross-Service Data Relationships</div>
+      <div class="svc-db">Services share data via Guid / string IDs — no database-level FK constraints across service boundaries</div>
+    </div>
+  </div>
+
+  <table class="xref-table">
+    <thead>
+      <tr>
+        <th>Source Service</th>
+        <th>Source Table · Field</th>
+        <th></th>
+        <th>Target Service</th>
+        <th>Target Table · Field</th>
+        <th>How / Why</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="svc-chip chip-auth">AuthService</span></td>
+        <td><code>Users.Id</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-wallet">WalletService</span></td>
+        <td><code>Wallets.UserId</code> (UQ)</td>
+        <td class="note-txt">One wallet created per user on KYC approval · HTTP POST from AdminService</td>
+      </tr>
+      <tr>
+        <td><span class="svc-chip chip-auth">AuthService</span></td>
+        <td><code>Users.Id</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-admin">AdminService</span></td>
+        <td><code>KycReviews.UserId</code> (UQ)</td>
+        <td class="note-txt">KYC data mirrored via RabbitMQ <code>kyc_submitted</code> event</td>
+      </tr>
+      <tr>
+        <td><span class="svc-chip chip-auth">AuthService</span></td>
+        <td><code>Users.Id</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-reward">RewardService</span></td>
+        <td><code>Rewards.UserId</code> (UQ)</td>
+        <td class="note-txt">Reward account created on first transaction · one account per user</td>
+      </tr>
+      <tr>
+        <td><span class="svc-chip chip-auth">AuthService</span></td>
+        <td><code>Users.Id</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-notif">NotificationSvc</span></td>
+        <td><code>notifications.UserId</code></td>
+        <td class="note-txt">UserId stored as string in MongoDB document · no FK</td>
+      </tr>
+      <tr>
+        <td><span class="svc-chip chip-wallet">WalletService</span></td>
+        <td><code>Wallets.Id</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-payment">PaymentService</span></td>
+        <td><code>Payments.WalletId</code></td>
+        <td class="note-txt">Payment credits this wallet via HTTP POST /api/wallet/credit</td>
+      </tr>
+      <tr>
+        <td><span class="svc-chip chip-wallet">WalletService</span></td>
+        <td><code>WalletTransactions.ReferenceNumber</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-reward">RewardService</span></td>
+        <td><code>RewardTransactions.Reference</code></td>
+        <td class="note-txt">Idempotent reward via RabbitMQ <code>transfer_completed</code> event</td>
+      </tr>
+      <tr>
+        <td><span class="svc-chip chip-payment">PaymentService</span></td>
+        <td><code>Payments.Id</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-reward">RewardService</span></td>
+        <td><code>RewardTransactions.Reference</code></td>
+        <td class="note-txt">Points awarded via RabbitMQ <code>topup_completed</code> event</td>
+      </tr>
+      <tr>
+        <td><span class="svc-chip chip-admin">AdminService</span></td>
+        <td><code>KycReviews.UserId</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-auth">AuthService</span></td>
+        <td><code>Users.Status</code></td>
+        <td class="note-txt">HTTP PUT to update user status (Active/Rejected) on KYC decision</td>
+      </tr>
+      <tr>
+        <td><span class="svc-chip chip-admin">AdminService</span></td>
+        <td><code>KycReviews.UserId</code></td>
+        <td class="arrow">&#8594;</td>
+        <td><span class="svc-chip chip-wallet">WalletService</span></td>
+        <td><code>Wallets (create)</code></td>
+        <td class="note-txt">HTTP POST to create wallet when KYC is approved</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:20px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.76rem;color:var(--dim);line-height:1.9;font-style:italic">
+    No database-level foreign keys exist between services. Each service owns its data exclusively (Database-per-Service pattern).
+    Cross-service consistency is maintained through RabbitMQ domain events (async) and direct HTTP calls (sync).
+    All references use Guid or string identifiers copied at event time.
+  </div>
+</div>
+
+<p style="text-align:center;color:var(--dim);font-size:.7rem;margin-top:32px">
+  Hover over FK/UQ fields for relationship details &nbsp;·&nbsp; ProjectWallet Database Schema &copy; 2024
+</p>
+
+<!-- ── TAB SWITCHING JS ── -->
+<script>
+const SVCS = ['auth','wallet','payment','admin','reward','notif','enums','xref'];
+const TAB_MAP = {
+  auth:'tab-auth', wallet:'tab-wallet', payment:'tab-payment',
+  admin:'tab-admin', reward:'tab-reward', notif:'tab-notif',
+  enums:null, xref:null
+};
+
+function show(id) {
+  SVCS.forEach(s => {
+    const sec = document.getElementById('svc-' + s);
+    if (sec) sec.classList.toggle('visible', s === id);
+  });
+  // update active tab
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const clicked = [...document.querySelectorAll('.tab')].find(t =>
+    t.getAttribute('onclick') === `show('${id}')`
+  );
+  if (clicked) clicked.classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<div class="space-y-6">
+
+      <!-- Header -->
+      <div>
+        <h2 class="text-xl font-display font-bold text-zinc-100">System Overview</h2>
+        <p class="text-zinc-500 text-sm mt-1">Real-time stats from all services</p>
+      </div>
+
+      <app-loader [show]="loading" />
+
+      @if (!loading) {
+
+        <!-- ── Stat Cards ── -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          @for (card of statCards; track card.label) {
+            <div
+              class="rounded-xl p-4 border transition-all"
+              [class.bg-zinc-900]="card.available"
+              [class.border-zinc-800]="card.available"
+              [class.bg-zinc-900/40]="!card.available"
+              [class.border-zinc-800/50]="!card.available"
+              [attr.title]="card.tooltip ?? null"
+            >
+              <p class="text-xs uppercase tracking-wider truncate"
+                 [class.text-zinc-500]="card.available"
+                 [class.text-zinc-600]="!card.available">
+                {{ card.label }}
+              </p>
+              <div class="flex items-end justify-between mt-2 gap-1">
+                <p class="text-2xl font-bold leading-none"
+                   [class]="card.available ? card.color : 'text-zinc-600'">
+                  {{ card.value }}
+                </p>
+                @if (!card.available) {
+                  <span class="text-[10px] text-zinc-600 border border-zinc-700 rounded px-1 cursor-help shrink-0">N/A</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- ── Analytics Row ── -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+          <!-- User Registration Trend -->
+          <div class="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-semibold text-zinc-200">User Registrations</h3>
+              <span class="text-xs text-zinc-500">Last 6 months</span>
+            </div>
+            <!-- Bar area: fixed 80px height, bars grow from bottom -->
+            <div class="flex items-end gap-2" style="height:80px">
+              @for (bar of registrationTrend; track bar.label) {
+                <div class="flex-1 flex flex-col items-center justify-end gap-1">
+                  <span class="text-[10px] text-zinc-500 font-medium leading-none">{{ bar.count }}</span>
+                  <div
+                    class="w-full bg-gradient-to-t from-amber-500 to-amber-300 rounded-t-sm transition-all duration-700"
+                    [style.height.px]="bar.barPx"
+                  ></div>
+                </div>
+              }
+            </div>
+            <!-- Label row below -->
+            <div class="flex gap-2 mt-2">
+              @for (bar of registrationTrend; track bar.label) {
+                <span class="flex-1 text-center text-[10px] text-zinc-500">{{ bar.label }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- KYC Stats -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
+            <h3 class="text-sm font-semibold text-zinc-200">KYC Today</h3>
+
+            <div class="space-y-3">
+              <!-- Approval Rate -->
+              <div>
+                <div class="flex justify-between text-xs text-zinc-400 mb-1.5">
+                  <span>Approval Rate</span>
+                  <span class="font-semibold text-emerald-400">{{ kycApprovalRate }}%</span>
+                </div>
+                <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-700"
+                    [style.width.%]="kycApprovalRate"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Stats breakdown -->
+              <div class="grid grid-cols-3 gap-2 pt-2">
+                <div class="text-center">
+                  <p class="text-lg font-bold text-amber-300">{{ stats?.pendingKYCCount ?? 0 }}</p>
+                  <p class="text-[10px] text-zinc-500 mt-0.5">Pending</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-lg font-bold text-emerald-400">{{ stats?.approvedKYCToday ?? 0 }}</p>
+                  <p class="text-[10px] text-zinc-500 mt-0.5">Approved</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-lg font-bold text-rose-400">{{ stats?.rejectedKYCToday ?? 0 }}</p>
+                  <p class="text-[10px] text-zinc-500 mt-0.5">Rejected</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── User Breakdown ── -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          <!-- User Activity Bar -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-zinc-200 mb-4">User Activity Breakdown</h3>
+            <div class="space-y-3">
+              <div>
+                <div class="flex justify-between text-xs text-zinc-400 mb-1.5">
+                  <span>Active Users</span>
+                  <span class="font-semibold text-emerald-400">{{ activeUsers }} / {{ totalUsers }}</span>
+                </div>
+                <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-emerald-500 rounded-full transition-all duration-700"
+                    [style.width.%]="totalUsers > 0 ? (activeUsers / totalUsers * 100) : 0"
+                  ></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs text-zinc-400 mb-1.5">
+                  <span>Blocked Users</span>
+                  <span class="font-semibold text-rose-400">{{ blockedUsers }} / {{ totalUsers }}</span>
+                </div>
+                <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-rose-500 rounded-full transition-all duration-700"
+                    [style.width.%]="totalUsers > 0 ? (blockedUsers / totalUsers * 100) : 0"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Insights (real data) -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-zinc-200 mb-4">Financial Insights</h3>
+            <div class="space-y-3">
+
+              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
+                <span class="text-sm text-zinc-400">Total Transaction Volume</span>
+                <span class="text-sm font-semibold text-emerald-300">
+                  ₹{{ (walletStats?.totalVolume ?? 0) | number:'1.2-2' }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
+                <span class="text-sm text-zinc-400">Today's Volume</span>
+                <span class="text-sm font-semibold text-amber-300">
+                  ₹{{ (walletStats?.todaysVolume ?? 0) | number:'1.2-2' }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
+                <span class="text-sm text-zinc-400">Total Transactions</span>
+                <span class="text-sm font-semibold text-sky-300">
+                  {{ (walletStats?.totalTransactionCount ?? 0) | number }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
+                <span class="text-sm text-zinc-400">Today's Transactions</span>
+                <span class="text-sm font-semibold text-zinc-200">
+                  {{ (walletStats?.todaysTransactionCount ?? 0) | number }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
+                <span class="text-sm text-zinc-400">Avg. Transaction Value</span>
+                <span class="text-sm font-semibold text-zinc-200">
+                  ₹{{ (walletStats?.averageTransactionValue ?? 0) | number:'1.2-2' }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between py-2">
+                <span class="text-sm text-zinc-400">Failed Transactions</span>
+                <span class="text-sm font-semibold"
+                  [class.text-rose-400]="(walletStats?.failedTransactions ?? 0) > 0"
+                  [class.text-zinc-500]="(walletStats?.failedTransactions ?? 0) === 0">
+                  {{ (walletStats?.failedTransactions ?? 0) | number }}
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      }
+    </div>

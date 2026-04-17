@@ -31,6 +31,7 @@ export const authInterceptor: HttpInterceptorFn = (
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Clear the local session and redirect once when a protected request comes back unauthorized.
       if (error.status === 401 && !isExcluded) {
         tokenService.clear();
 

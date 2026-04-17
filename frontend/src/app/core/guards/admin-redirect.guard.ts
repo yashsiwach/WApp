@@ -7,6 +7,7 @@ export const adminRedirectGuard: CanActivateFn = () => {
   const tokenService = inject(TokenService);
   const router = inject(Router);
 
+  // Skip the user dashboard entirely for admins and send them into the admin area.
   if (tokenService.isAdmin()) {
     return router.parseUrl('/admin');
   }

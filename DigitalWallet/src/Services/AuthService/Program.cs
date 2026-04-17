@@ -189,6 +189,28 @@ finally
     Log.CloseAndFlush();
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ── Reconcile migration history ──────────────────────────────────────────────
 // Called before Database.Migrate() to handle the case where the schema was
 // created outside EF migrations (manual SQL, EnsureCreated, prior tooling).

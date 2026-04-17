@@ -1,0 +1,204 @@
+@startuml Digital Wallet - Use Case Diagram
+
+title Digital Wallet System — Use Case Diagram
+
+left to right direction
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor<< Auth >>         #DDEEFF
+  BackgroundColor<< Wallet >>       #DDFFEE
+  BackgroundColor<< Payment >>      #FFF3CC
+  BackgroundColor<< Reward >>       #FFE5CC
+  BackgroundColor<< Support >>      #F0E6FF
+  BackgroundColor<< Notification >> #FFE0E0
+  BackgroundColor<< KYC >>          #E0F5FF
+  BackgroundColor<< UserMgmt >>     #F5F5DC
+  BackgroundColor<< Catalog >>      #E8FFE8
+  BackgroundColor<< Dashboard >>    #FDEBD0
+  BackgroundColor<< Templates >>    #F9EBEA
+  BackgroundColor<< SystemInt >>    #F2F3F4
+}
+
+' ─────────────────────────────────────────
+'  ACTORS
+' ─────────────────────────────────────────
+actor Guest           as G
+actor "Pending User"  as P
+actor "Active User"   as U
+actor Admin           as A
+actor System          as S
+
+' Inheritance
+P -up-|> G
+U -up-|> P
+
+' ─────────────────────────────────────────
+'  SYSTEM BOUNDARY
+' ─────────────────────────────────────────
+rectangle "Digital Wallet System" {
+
+  ' ── Authentication ──────────────────────
+  package "Authentication" {
+    usecase "Register Account"    as UC01 << Auth >>
+    usecase "Login"               as UC02 << Auth >>
+  }
+
+  ' ── KYC ─────────────────────────────────
+  package "KYC" {
+    usecase "Submit KYC Documents"  as UC03 << KYC >>
+    usecase "Check KYC Status"      as UC04 << KYC >>
+    usecase "View Profile"          as UC05 << KYC >>
+  }
+
+  ' ── Wallet ──────────────────────────────
+  package "Wallet" {
+    usecase "View Wallet Balance & Details"   as UC06 << Wallet >>
+    usecase "Transfer Money to User"          as UC07 << Wallet >>
+    usecase "View Transaction History"        as UC08 << Wallet >>
+    usecase "Export Transaction History"      as UC09 << Wallet >>
+  }
+
+  ' ── Payments ────────────────────────────
+  package "Payments (Top-up)" {
+    usecase "Add Funds to Wallet"   as UC10 << Payment >>
+    usecase "View Payment History"  as UC11 << Payment >>
+  }
+
+  ' ── Rewards ─────────────────────────────
+  package "Rewards & Loyalty" {
+    usecase "View Reward Points & Tier"   as UC12 << Reward >>
+    usecase "View Tier Progress"          as UC13 << Reward >>
+    usecase "View Reward History"         as UC14 << Reward >>
+    usecase "Browse Reward Catalog"       as UC15 << Reward >>
+    usecase "Redeem Points for Item"      as UC16 << Reward >>
+  }
+
+  ' ── Support ─────────────────────────────
+  package "Support" {
+    usecase "Create Support Ticket"         as UC17 << Support >>
+    usecase "View Own Tickets"              as UC18 << Support >>
+    usecase "View Ticket Details & Replies" as UC19 << Support >>
+  }
+
+  ' ── Notifications ────────────────────────
+  package "Notifications" {
+    usecase "View Notifications"           as UC20 << Notification >>
+    usecase "Mark Notification(s) as Read" as UC21 << Notification >>
+  }
+
+  ' ── Admin: KYC Management ───────────────
+  package "Admin — KYC Management" {
+    usecase "View Pending KYC Submissions" as UC22 << KYC >>
+    usecase "Approve KYC Submission"       as UC23 << KYC >>
+    usecase "Reject KYC Submission"        as UC24 << KYC >>
+  }
+
+  ' ── Admin: User Management ──────────────
+  package "Admin — User Management" {
+    usecase "View All Users"    as UC25 << UserMgmt >>
+    usecase "View User Details" as UC26 << UserMgmt >>
+  }
+
+  ' ── Admin: Support Ticket Mgmt ──────────
+  package "Admin — Support Ticket Management" {
+    usecase "View All Support Tickets" as UC27 << Support >>
+    usecase "Reply to Ticket"          as UC28 << Support >>
+    usecase "Close Ticket"             as UC29 << Support >>
+  }
+
+  ' ── Admin: Reward Catalog ───────────────
+  package "Admin — Reward Catalog" {
+    usecase "View Catalog Items"          as UC30 << Catalog >>
+    usecase "Create / Update Catalog Item" as UC31 << Catalog >>
+    usecase "Toggle Item Availability"    as UC32 << Catalog >>
+  }
+
+  ' ── Admin: Dashboard ────────────────────
+  package "Admin — Dashboard & Analytics" {
+    usecase "View Overview Dashboard"           as UC33 << Dashboard >>
+    usecase "View Wallet & Transaction Stats"   as UC34 << Dashboard >>
+  }
+
+  ' ── Admin: Notification Templates ───────
+  package "Admin — Notification Templates" {
+    usecase "View Notification Templates"   as UC35 << Templates >>
+    usecase "Update Notification Templates" as UC36 << Templates >>
+  }
+
+  ' ── System Internal ──────────────────────
+  package "System — Internal Automation" {
+    usecase "Sync KYC via RabbitMQ"           as UC37 << SystemInt >>
+    usecase "Auto-create Wallet on Approval"  as UC38 << SystemInt >>
+    usecase "Award Reward Points on Transfer" as UC39 << SystemInt >>
+    usecase "Send Notification on Event"      as UC40 << SystemInt >>
+    usecase "Credit Wallet after Payment"     as UC41 << SystemInt >>
+  }
+}
+
+' ─────────────────────────────────────────
+'  ASSOCIATIONS
+' ─────────────────────────────────────────
+
+' Guest
+G --> UC01
+G --> UC02
+
+' Pending User (inherits Guest)
+P --> UC03
+P --> UC04
+P --> UC05
+
+' Active User (inherits Pending User)
+U --> UC06
+U --> UC07
+U --> UC08
+U --> UC09
+U --> UC10
+U --> UC11
+U --> UC12
+U --> UC13
+U --> UC14
+U --> UC15
+U --> UC16
+U --> UC17
+U --> UC18
+U --> UC19
+U --> UC20
+U --> UC21
+
+' Admin
+A --> UC22
+A --> UC23
+A --> UC24
+A --> UC25
+A --> UC26
+A --> UC27
+A --> UC28
+A --> UC29
+A --> UC30
+A --> UC31
+A --> UC32
+A --> UC33
+A --> UC34
+A --> UC35
+A --> UC36
+
+' System
+S --> UC37
+S --> UC38
+S --> UC39
+S --> UC40
+S --> UC41
+
+' ─────────────────────────────────────────
+'  INCLUDE / EXTEND RELATIONSHIPS
+' ─────────────────────────────────────────
+UC23 .> UC38 : <<include>>
+UC23 .> UC40 : <<include>>
+UC24 .> UC40 : <<include>>
+UC07 .> UC39 : <<include>>
+UC07 .> UC40 : <<include>>
+UC10 .> UC41 : <<include>>
+UC28 .> UC40 : <<include>>
+
+@enduml

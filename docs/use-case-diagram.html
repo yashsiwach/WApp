@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wallet — Use Case Diagram</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+      color: white;
+      padding: 24px 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    header h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: 0.5px; }
+    header p  { font-size: 0.85rem; margin-top: 4px; opacity: 0.8; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 32px;
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      flex-wrap: wrap;
+    }
+    .toolbar span { font-size: 0.8rem; color: #666; }
+    .btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #3949ab; color: white; }
+    .btn-outline { background: white; color: #3949ab; border: 1px solid #3949ab; }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      padding: 10px 32px;
+      background: #fafafa;
+      border-bottom: 1px solid #e0e0e0;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #555;
+    }
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+
+    .diagram-container {
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* ── Actor Cards ─────────────────────── */
+    .actors-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .actor-card {
+      background: white;
+      border-radius: 10px;
+      padding: 16px 20px;
+      min-width: 200px;
+      flex: 1;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      border-top: 4px solid #ccc;
+    }
+    .actor-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+    .actor-card .role-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      color: white;
+      margin-bottom: 8px;
+    }
+    .actor-card .desc {
+      font-size: 0.78rem;
+      color: #666;
+      line-height: 1.4;
+    }
+    .actor-card.guest    { border-color: #78909c; }
+    .actor-card.pending  { border-color: #f9a825; }
+    .actor-card.active   { border-color: #43a047; }
+    .actor-card.admin    { border-color: #e53935; }
+    .actor-card.system   { border-color: #8e24aa; }
+
+    .guest   .role-badge { background: #78909c; }
+    .pending .role-badge { background: #f9a825; }
+    .active  .role-badge { background: #43a047; }
+    .admin   .role-badge { background: #e53935; }
+    .system  .role-badge { background: #8e24aa; }
+
+    /* ── Use Case Groups ──────────────────── */
+    .uc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .uc-group {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .uc-group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: white;
+    }
+    .uc-group-header .actor-tag {
+      font-size: 0.68rem;
+      font-weight: 400;
+      background: rgba(255,255,255,0.25);
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: auto;
+    }
+    .uc-list {
+      list-style: none;
+      padding: 10px 0;
+    }
+    .uc-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 16px;
+      font-size: 0.8rem;
+      color: #444;
+      border-bottom: 1px solid #f5f5f5;
+      line-height: 1.35;
+    }
+    .uc-list li:last-child { border-bottom: none; }
+    .uc-id {
+      font-size: 0.68rem;
+      color: #999;
+      min-width: 38px;
+      margin-top: 1px;
+      font-family: monospace;
+    }
+    .include-note {
+      font-size: 0.68rem;
+      color: #888;
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    /* group colour themes */
+    .auth-grp        .uc-group-header { background: #3949ab; }
+    .kyc-grp         .uc-group-header { background: #0288d1; }
+    .wallet-grp      .uc-group-header { background: #2e7d32; }
+    .payment-grp     .uc-group-header { background: #f57f17; }
+    .reward-grp      .uc-group-header { background: #e65100; }
+    .support-grp     .uc-group-header { background: #6a1b9a; }
+    .notif-grp       .uc-group-header { background: #c62828; }
+    .admin-kyc-grp   .uc-group-header { background: #00838f; }
+    .admin-user-grp  .uc-group-header { background: #4e342e; }
+    .admin-ticket-grp .uc-group-header { background: #37474f; }
+    .admin-catalog-grp .uc-group-header { background: #558b2f; }
+    .admin-dash-grp  .uc-group-header { background: #1565c0; }
+    .admin-tmpl-grp  .uc-group-header { background: #880e4f; }
+    .system-grp      .uc-group-header { background: #4a148c; }
+
+    /* ── Relationships Section ────────────── */
+    .rel-section {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .rel-section h2 {
+      padding: 14px 20px;
+      font-size: 0.9rem;
+      background: #37474f;
+      color: white;
+    }
+    .rel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    .rel-table th {
+      padding: 8px 16px;
+      text-align: left;
+      background: #f5f5f5;
+      color: #555;
+      font-weight: 600;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .rel-table td {
+      padding: 7px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #444;
+    }
+    .rel-table tr:last-child td { border-bottom: none; }
+    .rel-type {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.68rem;
+      font-weight: 600;
+    }
+    .include { background: #e3f2fd; color: #1565c0; }
+    .extend  { background: #f3e5f5; color: #6a1b9a; }
+    .inherit { background: #e8f5e9; color: #2e7d32; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.75rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Digital Wallet System — Use Case Diagram</h1>
+  <p>Microservices: AuthService · WalletService · PaymentService · AdminService · RewardService · NotificationService · Gateway</p>
+</header>
+
+<div class="toolbar">
+  <span>View:</span>
+  <button class="btn btn-primary" onclick="showAll()">All Actors</button>
+  <button class="btn btn-outline" onclick="filterActor('guest')">Guest</button>
+  <button class="btn btn-outline" onclick="filterActor('pending')">Pending User</button>
+  <button class="btn btn-outline" onclick="filterActor('active')">Active User</button>
+  <button class="btn btn-outline" onclick="filterActor('admin')">Admin</button>
+  <button class="btn btn-outline" onclick="filterActor('system')">System</button>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-color" style="background:#3949ab"></div> Authentication</div>
+  <div class="legend-item"><div class="legend-color" style="background:#0288d1"></div> KYC</div>
+  <div class="legend-item"><div class="legend-color" style="background:#2e7d32"></div> Wallet</div>
+  <div class="legend-item"><div class="legend-color" style="background:#f57f17"></div> Payments</div>
+  <div class="legend-item"><div class="legend-color" style="background:#e65100"></div> Rewards</div>
+  <div class="legend-item"><div class="legend-color" style="background:#6a1b9a"></div> Support</div>
+  <div class="legend-item"><div class="legend-color" style="background:#c62828"></div> Notifications</div>
+  <div class="legend-item"><div class="legend-color" style="background:#00838f"></div> Admin–KYC</div>
+  <div class="legend-item"><div class="legend-color" style="background:#558b2f"></div> Admin–Catalog</div>
+  <div class="legend-item"><div class="legend-color" style="background:#4a148c"></div> System</div>
+</div>
+
+<div class="diagram-container">
+
+  <!-- ── Actors ───────────────────────── -->
+  <div class="actors-row">
+    <div class="actor-card guest">
+      <h3>👤 Guest</h3>
+      <span class="role-badge">Unauthenticated</span>
+      <p class="desc">Any visitor who has not logged in. Can register or log in to access the system.</p>
+    </div>
+    <div class="actor-card pending">
+      <h3>🕐 Pending User</h3>
+      <span class="role-badge">Awaiting KYC</span>
+      <p class="desc">Registered user whose KYC documents are pending admin review. Inherits Guest capabilities.</p>
+    </div>
+    <div class="actor-card active">
+      <h3>✅ Active User</h3>
+      <span class="role-badge">KYC Approved</span>
+      <p class="desc">Fully verified user with access to wallet, payments, rewards, and support. Inherits Pending User capabilities.</p>
+    </div>
+    <div class="actor-card admin">
+      <h3>🛡️ Admin</h3>
+      <span class="role-badge">Administrator</span>
+      <p class="desc">Internal staff with elevated privileges for KYC review, user management, support, and analytics.</p>
+    </div>
+    <div class="actor-card system">
+      <h3>⚙️ System</h3>
+      <span class="role-badge">Automated</span>
+      <p class="desc">Background automation: RabbitMQ events, wallet auto-creation, reward awards, notifications.</p>
+    </div>
+  </div>
+
+  <!-- ── Use Case Groups ──────────────── -->
+  <div class="uc-grid" id="ucGrid">
+
+    <!-- Authentication -->
+    <div class="uc-group auth-grp" data-actors="guest pending active">
+      <div class="uc-group-header">
+        🔐 Authentication
+        <span class="actor-tag">Guest</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-01</span><span>Register Account</span></li>
+        <li><span class="uc-id">UC-02</span><span>Login</span></li>
+      </ul>
+    </div>
+
+    <!-- KYC -->
+    <div class="uc-group kyc-grp" data-actors="pending active">
+      <div class="uc-group-header">
+        📋 KYC
+        <span class="actor-tag">Pending User</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-03</span><span>Submit KYC Documents</span></li>
+        <li><span class="uc-id">UC-04</span><span>Check KYC Status</span></li>
+        <li><span class="uc-id">UC-05</span><span>View Profile</span></li>
+      </ul>
+    </div>
+
+    <!-- Wallet -->
+    <div class="uc-group wallet-grp" data-actors="active">
+      <div class="uc-group-header">
+        💰 Wallet
+        <span class="actor-tag">Active User</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-06</span><span>View Wallet Balance &amp; Details</span></li>
+        <li>
+          <span class="uc-id">UC-07</span>
+          <span>
+            Transfer Money to User
+            <div class="include-note">«include» Award Reward Points, Send Notification</div>
+          </span>
+        </li>
+        <li><span class="uc-id">UC-08</span><span>View Transaction History</span></li>
+        <li><span class="uc-id">UC-09</span><span>Export Transaction History (CSV/PDF)</span></li>
+      </ul>
+    </div>
+
+    <!-- Payments -->
+    <div class="uc-group payment-grp" data-actors="active">
+      <div class="uc-group-header">
+        💳 Payments (Top-up)
+        <span class="actor-tag">Active User</span>
+      </div>
+      <ul class="uc-list">
+        <li>
+          <span class="uc-id">UC-10</span>
+          <span>
+            Add Funds to Wallet
+            <div class="include-note">«include» Credit Wallet after Payment</div>
+          </span>
+        </li>
+        <li><span class="uc-id">UC-11</span><span>View Payment History</span></li>
+      </ul>
+    </div>
+
+    <!-- Rewards -->
+    <div class="uc-group reward-grp" data-actors="active">
+      <div class="uc-group-header">
+        🏆 Rewards &amp; Loyalty
+        <span class="actor-tag">Active User</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-12</span><span>View Reward Points &amp; Tier (Bronze → Silver → Gold → Platinum)</span></li>
+        <li><span class="uc-id">UC-13</span><span>View Tier Progress</span></li>
+        <li><span class="uc-id">UC-14</span><span>View Reward History</span></li>
+        <li><span class="uc-id">UC-15</span><span>Browse Reward Catalog</span></li>
+        <li><span class="uc-id">UC-16</span><span>Redeem Points for Catalog Item</span></li>
+      </ul>
+    </div>
+
+    <!-- Support -->
+    <div class="uc-group support-grp" data-actors="active">
+      <div class="uc-group-header">
+        🎫 Support
+        <span class="actor-tag">Active User</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-17</span><span>Create Support Ticket</span></li>
+        <li><span class="uc-id">UC-18</span><span>View Own Tickets</span></li>
+        <li><span class="uc-id">UC-19</span><span>View Ticket Details &amp; Admin Replies</span></li>
+      </ul>
+    </div>
+
+    <!-- Notifications -->
+    <div class="uc-group notif-grp" data-actors="active">
+      <div class="uc-group-header">
+        🔔 Notifications
+        <span class="actor-tag">Active User</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-20</span><span>View Notifications</span></li>
+        <li><span class="uc-id">UC-21</span><span>Mark Notification(s) as Read</span></li>
+      </ul>
+    </div>
+
+    <!-- Admin: KYC -->
+    <div class="uc-group admin-kyc-grp" data-actors="admin">
+      <div class="uc-group-header">
+        🔍 Admin — KYC Management
+        <span class="actor-tag">Admin</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-22</span><span>View Pending KYC Submissions</span></li>
+        <li>
+          <span class="uc-id">UC-23</span>
+          <span>
+            Approve KYC Submission
+            <div class="include-note">«include» Auto-create Wallet, Notify User</div>
+          </span>
+        </li>
+        <li>
+          <span class="uc-id">UC-24</span>
+          <span>
+            Reject KYC Submission
+            <div class="include-note">«include» Notify User</div>
+          </span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Admin: User Mgmt -->
+    <div class="uc-group admin-user-grp" data-actors="admin">
+      <div class="uc-group-header">
+        👥 Admin — User Management
+        <span class="actor-tag">Admin</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-25</span><span>View All Users</span></li>
+        <li><span class="uc-id">UC-26</span><span>View User Details</span></li>
+      </ul>
+    </div>
+
+    <!-- Admin: Support -->
+    <div class="uc-group admin-ticket-grp" data-actors="admin">
+      <div class="uc-group-header">
+        📩 Admin — Support Ticket Management
+        <span class="actor-tag">Admin</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-27</span><span>View All Support Tickets</span></li>
+        <li>
+          <span class="uc-id">UC-28</span>
+          <span>
+            Reply to Ticket
+            <div class="include-note">«include» Notify User</div>
+          </span>
+        </li>
+        <li><span class="uc-id">UC-29</span><span>Close Ticket</span></li>
+      </ul>
+    </div>
+
+    <!-- Admin: Catalog -->
+    <div class="uc-group admin-catalog-grp" data-actors="admin">
+      <div class="uc-group-header">
+        🛍️ Admin — Reward Catalog
+        <span class="actor-tag">Admin</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-30</span><span>View Catalog Items</span></li>
+        <li><span class="uc-id">UC-31</span><span>Create / Update Catalog Item</span></li>
+        <li><span class="uc-id">UC-32</span><span>Toggle Item Availability</span></li>
+      </ul>
+    </div>
+
+    <!-- Admin: Dashboard -->
+    <div class="uc-group admin-dash-grp" data-actors="admin">
+      <div class="uc-group-header">
+        📊 Admin — Dashboard &amp; Analytics
+        <span class="actor-tag">Admin</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-33</span><span>View Overview Dashboard (Pending KYC, Daily Actions)</span></li>
+        <li><span class="uc-id">UC-34</span><span>View Wallet &amp; Transaction Statistics</span></li>
+      </ul>
+    </div>
+
+    <!-- Admin: Templates -->
+    <div class="uc-group admin-tmpl-grp" data-actors="admin">
+      <div class="uc-group-header">
+        📝 Admin — Notification Templates
+        <span class="actor-tag">Admin</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-35</span><span>View Notification Templates</span></li>
+        <li><span class="uc-id">UC-36</span><span>Update Notification Templates</span></li>
+      </ul>
+    </div>
+
+    <!-- System -->
+    <div class="uc-group system-grp" data-actors="system">
+      <div class="uc-group-header">
+        ⚙️ System — Internal Automation
+        <span class="actor-tag">System</span>
+      </div>
+      <ul class="uc-list">
+        <li><span class="uc-id">UC-37</span><span>Sync KYC Data via RabbitMQ (AuthService → AdminService)</span></li>
+        <li><span class="uc-id">UC-38</span><span>Auto-create Wallet on KYC Approval</span></li>
+        <li><span class="uc-id">UC-39</span><span>Award Reward Points after Transfer</span></li>
+        <li><span class="uc-id">UC-40</span><span>Send Notification on Events</span></li>
+        <li><span class="uc-id">UC-41</span><span>Credit Wallet after Payment Confirmed</span></li>
+      </ul>
+    </div>
+
+  </div><!-- /uc-grid -->
+
+  <!-- ── Relationships ─────────────────── -->
+  <div class="rel-section">
+    <h2>Relationships &amp; Key Rules</h2>
+    <table class="rel-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="rel-type inherit">«extend»</span></td><td>Pending User</td><td>Guest</td><td>Pending User inherits all Guest capabilities</td></tr>
+        <tr><td><span class="rel-type inherit">«extend»</span></td><td>Active User</td><td>Pending User</td><td>Active User inherits all Pending User capabilities</td></tr>
+        <tr><td><span class="rel-type include">«include»</span></td><td>UC-07 Transfer Money</td><td>UC-39 Award Reward Points</td><td>Every successful transfer triggers reward points for sender</td></tr>
+        <tr><td><span class="rel-type include">«include»</span></td><td>UC-07 Transfer Money</td><td>UC-40 Send Notification</td><td>Both sender and recipient are notified on transfer</td></tr>
+        <tr><td><span class="rel-type include">«include»</span></td><td>UC-10 Add Funds</td><td>UC-41 Credit Wallet</td><td>Wallet is automatically credited after payment gateway approval</td></tr>
+        <tr><td><span class="rel-type include">«include»</span></td><td>UC-23 Approve KYC</td><td>UC-38 Auto-create Wallet</td><td>Wallet is created automatically when KYC is approved</td></tr>
+        <tr><td><span class="rel-type include">«include»</span></td><td>UC-23 Approve KYC</td><td>UC-40 Send Notification</td><td>User is notified on KYC approval</td></tr>
+        <tr><td><span class="rel-type include">«include»</span></td><td>UC-24 Reject KYC</td><td>UC-40 Send Notification</td><td>User is notified on KYC rejection (can resubmit)</td></tr>
+        <tr><td><span class="rel-type include">«include»</span></td><td>UC-28 Reply to Ticket</td><td>UC-40 Send Notification</td><td>User is notified when admin replies to their support ticket</td></tr>
+        <tr><td><span class="rel-type extend">«constraint»</span></td><td>UC-07 Transfer</td><td>—</td><td>Min ₹1 · Max ₹1,00,000 · Recipient must be Active user</td></tr>
+        <tr><td><span class="rel-type extend">«constraint»</span></td><td>UC-10 Top-up</td><td>—</td><td>Min ₹1 · Max ₹1,00,000 · MockGateway always approves in dev</td></tr>
+        <tr><td><span class="rel-type extend">«constraint»</span></td><td>UC-16 Redeem</td><td>—</td><td>Points balance must be ≥ item cost · Item must be available</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /diagram-container -->
+
+<footer>Digital Wallet — Use Case Diagram &nbsp;|&nbsp; Generated for ProjectWallet (.NET 8 Microservices + Angular)</footer>
+
+<script>
+  function showAll() {
+    document.querySelectorAll('.uc-group').forEach(el => el.style.display = '');
+  }
+  function filterActor(actor) {
+    document.querySelectorAll('.uc-group').forEach(el => {
+      const actors = (el.dataset.actors || '').split(' ');
+      el.style.display = actors.includes(actor) ? '' : 'none';
+    });
+  }
+</script>
+
+</body>
+</html>

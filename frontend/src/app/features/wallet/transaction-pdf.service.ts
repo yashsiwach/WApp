@@ -17,6 +17,7 @@ function formatDate(dateStr: string): string {
 
 @Injectable({ providedIn: 'root' })
 export class TransactionPdfService {
+  // Build a styled transaction statement PDF and trigger the browser download.
   download(wallet: WalletResponse, transactions: TransactionResponse[]): void {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageW = doc.internal.pageSize.getWidth();

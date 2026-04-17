@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ProjectWallet — Architecture Diagram</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 32px 24px 48px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: #f8fafc;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: .85rem;
+    color: #94a3b8;
+    margin-bottom: 36px;
+  }
+
+  /* ── DIAGRAM WRAPPER ── */
+  .diagram {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  /* ── LAYER LABELS ── */
+  .layer-label {
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+
+  /* ── GENERIC BOX ── */
+  .box {
+    border-radius: 12px;
+    border: 1.5px solid;
+    padding: 14px 18px;
+    position: relative;
+    transition: transform .15s, box-shadow .15s;
+    cursor: default;
+  }
+  .box:hover { transform: translateY(-2px); }
+
+  .box-title {
+    font-weight: 700;
+    font-size: .95rem;
+    margin-bottom: 4px;
+  }
+  .box-sub {
+    font-size: .72rem;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+  .badge {
+    display: inline-block;
+    font-size: .62rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-top: 6px;
+    margin-right: 4px;
+    letter-spacing: .04em;
+  }
+
+  /* ── FRONTEND ── */
+  .layer-frontend { margin-bottom: 0; }
+  .box-frontend {
+    background: #1e3a5f;
+    border-color: #3b82f6;
+    box-shadow: 0 0 24px #3b82f620;
+  }
+  .box-frontend .box-title { color: #60a5fa; }
+  .badge-angular { background: #1d4ed8; color: #bfdbfe; }
+  .badge-tailwind { background: #0e7490; color: #a5f3fc; }
+
+  /* ── GATEWAY ── */
+  .layer-gateway { margin-bottom: 0; }
+  .box-gateway {
+    background: #2e1a5e;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 24px #8b5cf620;
+  }
+  .box-gateway .box-title { color: #a78bfa; }
+  .badge-ocelot { background: #4c1d95; color: #ddd6fe; }
+
+  /* ── SERVICES ROW ── */
+  .services-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+  }
+
+  .box-auth    { background: #1a2e3b; border-color: #06b6d4; box-shadow: 0 0 16px #06b6d415; }
+  .box-auth    .box-title { color: #22d3ee; }
+
+  .box-wallet  { background: #1a2e22; border-color: #22c55e; box-shadow: 0 0 16px #22c55e15; }
+  .box-wallet  .box-title { color: #4ade80; }
+
+  .box-payment { background: #2e2218; border-color: #f59e0b; box-shadow: 0 0 16px #f59e0b15; }
+  .box-payment .box-title { color: #fbbf24; }
+
+  .box-admin   { background: #2e1a1a; border-color: #ef4444; box-shadow: 0 0 16px #ef444415; }
+  .box-admin   .box-title { color: #f87171; }
+
+  .box-reward  { background: #2a1a2e; border-color: #d946ef; box-shadow: 0 0 16px #d946ef15; }
+  .box-reward  .box-title { color: #e879f9; }
+
+  .box-notif   { background: #1a1f2e; border-color: #818cf8; box-shadow: 0 0 16px #818cf815; }
+  .box-notif   .box-title { color: #a5b4fc; }
+
+  /* ── RABBITMQ BAND ── */
+  .rabbitmq-band {
+    background: #2d1f0a;
+    border: 1.5px solid #f59e0b;
+    border-radius: 12px;
+    padding: 14px 20px;
+    box-shadow: 0 0 28px #f59e0b18;
+  }
+  .rabbitmq-band .band-title {
+    font-weight: 700;
+    font-size: .9rem;
+    color: #fbbf24;
+    margin-bottom: 10px;
+  }
+  .queues {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .queue-pill {
+    background: #431407;
+    border: 1px solid #92400e;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: .72rem;
+    color: #fde68a;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .queue-pill .q-name { font-weight: 700; font-size: .75rem; }
+  .queue-pill .q-flow { color: #fcd34d; }
+
+  /* ── DATABASES ROW ── */
+  .databases-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+  }
+  .box-db {
+    background: #0f2420;
+    border-color: #10b981;
+    box-shadow: 0 0 14px #10b98110;
+  }
+  .box-db .box-title { color: #34d399; font-size: .82rem; }
+  .box-db .box-sub { font-size: .67rem; }
+
+  .box-mongo {
+    background: #0d2210;
+    border-color: #16a34a;
+    box-shadow: 0 0 14px #16a34a15;
+  }
+  .box-mongo .box-title { color: #4ade80; font-size: .82rem; }
+
+  .db-icon { font-size: 1.1rem; margin-bottom: 4px; }
+
+  /* ── CONNECTOR LINES (SVG overlay) ── */
+  .connector-wrap {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .connector-wrap svg { overflow: visible; display: block; }
+
+  /* ── ARROWS SECTION (CSS-based) ── */
+  .arrow-down {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 36px;
+    position: relative;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .arrow-down .line {
+    width: 2px;
+    flex: 1;
+    background: #475569;
+  }
+  .arrow-down .arrowhead {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #475569;
+  }
+  .arrow-label {
+    font-size: .65rem;
+    color: #94a3b8;
+    text-align: center;
+    margin-top: -2px;
+    letter-spacing: .04em;
+  }
+
+  /* ── INTER-LAYER SPACER WITH ARROWS ── */
+  .spacer {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: .72rem;
+  }
+  .spacer svg { flex-shrink: 0; }
+
+  /* ── LEGEND ── */
+  .legend {
+    max-width: 1200px;
+    margin: 32px auto 0;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .legend-title {
+    font-weight: 700;
+    font-size: .85rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 14px;
+  }
+  .legend-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .78rem;
+    color: #cbd5e1;
+  }
+  .legend-swatch {
+    width: 28px;
+    height: 4px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .legend-box-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 2px solid;
+    flex-shrink: 0;
+  }
+
+  /* ── TOOLTIP ── */
+  .box[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: .72rem;
+    color: #e2e8f0;
+    white-space: pre-line;
+    z-index: 100;
+    min-width: 180px;
+    line-height: 1.6;
+    pointer-events: none;
+    box-shadow: 0 8px 24px #00000060;
+  }
+
+  /* ── SECTION DIVIDERS ── */
+  .section-gap { height: 14px; }
+  .full-row { margin-bottom: 12px; }
+
+  /* ── SERVICE-TO-SERVICE callout ── */
+  .s2s-band {
+    background: #151f30;
+    border: 1px dashed #334155;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: .73rem;
+    color: #64748b;
+    line-height: 1.8;
+    margin-bottom: 0;
+  }
+  .s2s-band strong { color: #94a3b8; }
+
+  /* responsive */
+  @media (max-width: 900px) {
+    .services-row, .databases-row { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .services-row, .databases-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<h1>ProjectWallet — System Architecture</h1>
+<p class="subtitle">.NET 8 Microservices &nbsp;·&nbsp; Angular 21 Frontend &nbsp;·&nbsp; Ocelot Gateway &nbsp;·&nbsp; RabbitMQ &nbsp;·&nbsp; SQL Server + MongoDB Atlas</p>
+
+<div class="diagram">
+
+  <!-- ═══ LAYER 0 — FRONTEND ═══ -->
+  <div class="layer-label">Client Layer</div>
+  <div class="full-row">
+    <div class="box box-frontend"
+         data-tip="Angular 21.2 · TailwindCSS&#10;Port: 4200 (dev)&#10;Roles: User Dashboard, Admin Panel&#10;Talks to: API Gateway :5000&#10;Features: PDF export, real-time balance, pagination">
+      <div class="box-title">&#9654; Angular Frontend</div>
+      <div class="box-sub">
+        User Dashboard &nbsp;·&nbsp; Admin Panel &nbsp;·&nbsp; KYC Flow &nbsp;·&nbsp; Rewards &nbsp;·&nbsp; Notifications
+        <span class="badge badge-angular">Angular 21</span>
+        <span class="badge badge-tailwind">TailwindCSS</span>
+        <span class="badge" style="background:#1e3a5f;color:#93c5fd;">Port 4200</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow: Frontend → Gateway -->
+  <div class="spacer">
+    <svg width="2" height="28" viewBox="0 0 2 28"><line x1="1" y1="0" x2="1" y2="22" stroke="#3b82f6" stroke-width="2"/><polygon points="1,28 -4,18 6,18" fill="#3b82f6"/></svg>
+    <span style="color:#3b82f6;font-weight:600;">REST / HTTPS &nbsp;→&nbsp; :5000</span>
+  </div>
+
+  <!-- ═══ LAYER 1 — API GATEWAY ═══ -->
+  <div class="layer-label">API Gateway Layer</div>
+  <div class="full-row">
+    <div class="box box-gateway"
+         data-tip="Ocelot API Gateway&#10;HTTP: 5000 · HTTPS: 7091&#10;Routes all /api/* requests to downstream services&#10;Applies JWT bearer validation">
+      <div class="box-title">&#9651; Ocelot API Gateway</div>
+      <div class="box-sub">
+        Single entry-point &nbsp;·&nbsp; JWT auth validation &nbsp;·&nbsp; Path-based routing to all downstream services
+        <span class="badge badge-ocelot">Ocelot</span>
+        <span class="badge" style="background:#2e1a5e;color:#c4b5fd;">HTTP :5000</span>
+        <span class="badge" style="background:#2e1a5e;color:#c4b5fd;">HTTPS :7091</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow: Gateway → Services -->
+  <div class="spacer">
+    <svg width="2" height="28" viewBox="0 0 2 28"><line x1="1" y1="0" x2="1" y2="22" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4 3"/><polygon points="1,28 -4,18 6,18" fill="#8b5cf6"/></svg>
+    <span style="color:#8b5cf6;font-weight:600;">Reverse-proxy to microservices</span>
+  </div>
+
+  <!-- ═══ LAYER 2 — MICROSERVICES ═══ -->
+  <div class="layer-label">Microservices Layer</div>
+  <div class="services-row" style="margin-bottom:12px;">
+
+    <div class="box box-auth"
+         data-tip="AuthService&#10;HTTP :5001 · HTTPS :7268&#10;DB: SQL Server (WalletAuth)&#10;Handles: Register, Login, JWT, KYC&#10;Publishes: kyc_submitted → RabbitMQ&#10;Publishes: notifications → RabbitMQ">
+      <div class="box-title">&#128272; Auth</div>
+      <div class="box-sub">Register · Login · JWT · KYC submit</div>
+      <span class="badge" style="background:#164e63;color:#a5f3fc;">:5001</span>
+      <span class="badge" style="background:#164e63;color:#a5f3fc;">:7268</span>
+    </div>
+
+    <div class="box box-wallet"
+         data-tip="WalletService&#10;HTTP :5002 · HTTPS :7117&#10;DB: SQL Server (WalletWallet)&#10;Handles: Balance, Transfers, Top-up credit&#10;Publishes: transfer_completed, notifications → RabbitMQ&#10;Calls: AuthService, RewardService">
+      <div class="box-title">&#128181; Wallet</div>
+      <div class="box-sub">Balance · Transfers · History</div>
+      <span class="badge" style="background:#14532d;color:#bbf7d0;">:5002</span>
+      <span class="badge" style="background:#14532d;color:#bbf7d0;">:7117</span>
+    </div>
+
+    <div class="box box-payment"
+         data-tip="PaymentService&#10;HTTP :5003 · HTTPS :7208&#10;DB: SQL Server (WalletPayment)&#10;Handles: Top-up ₹1–₹1,00,000&#10;Calls: WalletService :7117 to credit&#10;Publishes: topup_completed → RabbitMQ">
+      <div class="box-title">&#128179; Payment</div>
+      <div class="box-sub">Top-up · Payment history</div>
+      <span class="badge" style="background:#451a03;color:#fde68a;">:5003</span>
+      <span class="badge" style="background:#451a03;color:#fde68a;">:7208</span>
+    </div>
+
+    <div class="box box-admin"
+         data-tip="AdminService&#10;HTTP :5004 · HTTPS :7097&#10;DB: SQL Server (WalletAdmin)&#10;Handles: KYC review, tickets, catalog, dashboard&#10;Calls: AuthService :7268, WalletService :7117&#10;Consumes: kyc_submitted queue&#10;Publishes: notifications → RabbitMQ">
+      <div class="box-title">&#128736; Admin</div>
+      <div class="box-sub">KYC review · Tickets · Dashboard</div>
+      <span class="badge" style="background:#450a0a;color:#fecaca;">:5004</span>
+      <span class="badge" style="background:#450a0a;color:#fecaca;">:7097</span>
+    </div>
+
+    <div class="box box-reward"
+         data-tip="RewardService&#10;HTTP :5005 · HTTPS :7249&#10;DB: SQL Server (WalletReward)&#10;Handles: Points, Tiers (Bronze→Platinum), Catalog&#10;Consumes: transfer_completed, topup_completed queues&#10;Tiers: Bronze 0–999 · Silver 1K–4.9K · Gold 5K–14.9K · Platinum 15K+">
+      <div class="box-title">&#127881; Reward</div>
+      <div class="box-sub">Points · Tiers · Catalog</div>
+      <span class="badge" style="background:#4a044e;color:#f5d0fe;">:5005</span>
+      <span class="badge" style="background:#4a044e;color:#f5d0fe;">:7249</span>
+    </div>
+
+    <div class="box box-notif"
+         data-tip="NotificationService&#10;HTTP :5006 · HTTPS :7086&#10;DB: MongoDB Atlas (WalletNotifications)&#10;Handles: In-app notifications, read status&#10;Consumes: notifications queue from RabbitMQ&#10;No direct HTTP calls to other services">
+      <div class="box-title">&#128276; Notify</div>
+      <div class="box-sub">In-app alerts · Read status</div>
+      <span class="badge" style="background:#1e1b4b;color:#c7d2fe;">:5006</span>
+      <span class="badge" style="background:#1e1b4b;color:#c7d2fe;">:7086</span>
+    </div>
+
+  </div>
+
+  <!-- Service-to-service HTTP calls callout -->
+  <div class="s2s-band" style="margin-bottom:14px;">
+    <strong>Direct HTTP (service-to-service):</strong>
+    &nbsp; AdminService → AuthService :7268 (update user status after KYC)
+    &nbsp;·&nbsp; AdminService → WalletService :7117 (create wallet on approval)
+    &nbsp;·&nbsp; WalletService → AuthService :7268 (verify user by email)
+    &nbsp;·&nbsp; PaymentService → WalletService :7117 (credit wallet after top-up)
+  </div>
+
+  <!-- Arrow: Services ↕ RabbitMQ -->
+  <div class="spacer">
+    <svg width="2" height="20" viewBox="0 0 2 20"><line x1="1" y1="0" x2="1" y2="14" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3 2"/><polygon points="1,20 -4,10 6,10" fill="#f59e0b"/></svg>
+    <span style="color:#f59e0b;font-weight:600;">Async Events (RabbitMQ)</span>
+  </div>
+
+  <!-- ═══ LAYER 3 — RABBITMQ ═══ -->
+  <div class="layer-label">Message Broker</div>
+  <div class="rabbitmq-band full-row">
+    <div class="band-title">&#128030; RabbitMQ &nbsp;<span style="font-weight:400;font-size:.8rem;color:#d97706;">localhost:5672 &nbsp;·&nbsp; Durable queues &nbsp;·&nbsp; Explicit ACK</span></div>
+    <div class="queues">
+      <div class="queue-pill">
+        <span class="q-name">kyc_submitted</span>
+        <span class="q-flow">&#8594; Published by: AuthService</span>
+        <span class="q-flow">&#8592; Consumed by: AdminService</span>
+      </div>
+      <div class="queue-pill">
+        <span class="q-name">transfer_completed</span>
+        <span class="q-flow">&#8594; Published by: WalletService</span>
+        <span class="q-flow">&#8592; Consumed by: RewardService</span>
+      </div>
+      <div class="queue-pill">
+        <span class="q-name">topup_completed</span>
+        <span class="q-flow">&#8594; Published by: PaymentService</span>
+        <span class="q-flow">&#8592; Consumed by: RewardService</span>
+      </div>
+      <div class="queue-pill">
+        <span class="q-name">notifications</span>
+        <span class="q-flow">&#8594; Published by: Auth · Wallet · Admin</span>
+        <span class="q-flow">&#8592; Consumed by: NotificationService</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow: RabbitMQ → DB -->
+  <div class="spacer">
+    <svg width="2" height="20" viewBox="0 0 2 20"><line x1="1" y1="0" x2="1" y2="14" stroke="#475569" stroke-width="2"/><polygon points="1,20 -4,10 6,10" fill="#475569"/></svg>
+    <span style="color:#64748b;">Persistence</span>
+  </div>
+
+  <!-- ═══ LAYER 4 — DATABASES ═══ -->
+  <div class="layer-label">Data Layer</div>
+  <div class="databases-row">
+
+    <div class="box box-db"
+         data-tip="SQL Server (SQLEXPRESS)&#10;Database: WalletAuth&#10;Entities: User, KycDocument, UserSession&#10;ORM: Entity Framework Core 8">
+      <div class="db-icon">&#128196;</div>
+      <div class="box-title">SQL · WalletAuth</div>
+      <div class="box-sub">User · KycDocument · UserSession</div>
+    </div>
+
+    <div class="box box-db"
+         data-tip="SQL Server (SQLEXPRESS)&#10;Database: WalletWallet&#10;Entities: Wallet, WalletTransaction, DailyTransactionSummary&#10;ORM: Entity Framework Core 8">
+      <div class="db-icon">&#128196;</div>
+      <div class="box-title">SQL · WalletWallet</div>
+      <div class="box-sub">Wallet · Transaction · DailySummary</div>
+    </div>
+
+    <div class="box box-db"
+         data-tip="SQL Server (SQLEXPRESS)&#10;Database: WalletPayment&#10;Entities: Payment, PaymentRefund&#10;ORM: Entity Framework Core 8">
+      <div class="db-icon">&#128196;</div>
+      <div class="box-title">SQL · WalletPayment</div>
+      <div class="box-sub">Payment · PaymentRefund</div>
+    </div>
+
+    <div class="box box-db"
+         data-tip="SQL Server (SQLEXPRESS)&#10;Database: WalletAdmin&#10;Entities: KycReview, SupportTicket, AdminAuditLog&#10;ORM: Entity Framework Core 8">
+      <div class="db-icon">&#128196;</div>
+      <div class="box-title">SQL · WalletAdmin</div>
+      <div class="box-sub">KycReview · Ticket · AuditLog</div>
+    </div>
+
+    <div class="box box-db"
+         data-tip="SQL Server (SQLEXPRESS)&#10;Database: WalletReward&#10;Entities: Reward, RewardTransaction, RewardRule, CatalogItem&#10;Tiers: Bronze / Silver / Gold / Platinum&#10;ORM: Entity Framework Core 8">
+      <div class="db-icon">&#128196;</div>
+      <div class="box-title">SQL · WalletReward</div>
+      <div class="box-sub">Reward · RewardTx · CatalogItem</div>
+    </div>
+
+    <div class="box box-mongo"
+         data-tip="MongoDB Atlas (Cloud)&#10;Database: WalletNotifications&#10;Collection: notifications&#10;Driver: MongoDB .NET Driver (no ORM)&#10;Connection: cloud-hosted Atlas cluster">
+      <div class="db-icon">&#127809;</div>
+      <div class="box-title">MongoDB Atlas</div>
+      <div class="box-sub">Collection: notifications (cloud)</div>
+    </div>
+
+  </div>
+
+</div><!-- /diagram -->
+
+<!-- ═══ LEGEND ═══ -->
+<div class="legend">
+  <div class="legend-title">Legend</div>
+  <div class="legend-grid">
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#1e3a5f;border-color:#3b82f6;"></div>
+      Angular Frontend
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#2e1a5e;border-color:#8b5cf6;"></div>
+      Ocelot API Gateway
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#1a2e3b;border-color:#06b6d4;"></div>
+      AuthService
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#1a2e22;border-color:#22c55e;"></div>
+      WalletService
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#2e2218;border-color:#f59e0b;"></div>
+      PaymentService
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#2e1a1a;border-color:#ef4444;"></div>
+      AdminService
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#2a1a2e;border-color:#d946ef;"></div>
+      RewardService
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#1a1f2e;border-color:#818cf8;"></div>
+      NotificationService
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#2d1f0a;border-color:#f59e0b;"></div>
+      RabbitMQ (async)
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#0f2420;border-color:#10b981;"></div>
+      SQL Server DB
+    </div>
+    <div class="legend-item">
+      <div class="legend-box-swatch" style="background:#0d2210;border-color:#16a34a;"></div>
+      MongoDB Atlas
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#3b82f6;"></div>
+      REST / HTTPS call
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#f59e0b;height:2px;border-top:2px dashed #f59e0b;background:none;"></div>
+      Async message (RabbitMQ)
+    </div>
+  </div>
+
+  <div style="margin-top:20px;border-top:1px solid #1e293b;padding-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;font-size:.73rem;color:#64748b;line-height:1.8;">
+    <div>
+      <strong style="color:#94a3b8;">Tech Stack</strong><br>
+      Backend: .NET 8 · EF Core 8 · Serilog<br>
+      Auth: JWT Bearer (BCrypt passwords)<br>
+      ORM: Entity Framework Core
+    </div>
+    <div>
+      <strong style="color:#94a3b8;">Gateway Routes</strong><br>
+      /api/auth/** → AuthService :7268<br>
+      /api/wallet/** → WalletService :7117<br>
+      /api/payment/** → PaymentService :7208
+    </div>
+    <div>
+      <strong style="color:#94a3b8;">More Routes</strong><br>
+      /api/admin/** → AdminService :7097<br>
+      /api/support/** → AdminService :7097<br>
+      /api/reward/** → RewardService :7249<br>
+      /api/notifications/** → NotificationService :7086
+    </div>
+    <div>
+      <strong style="color:#94a3b8;">Design Patterns</strong><br>
+      API Gateway · Database-per-service<br>
+      Repository pattern · Service layer<br>
+      Event-driven · Idempotency keys<br>
+      Role-based access (User / Admin)
+    </div>
+  </div>
+</div>
+
+<p style="text-align:center;margin-top:24px;font-size:.7rem;color:#334155;">Hover over any component for details &nbsp;·&nbsp; ProjectWallet &copy; 2024</p>
+
+</body>
+</html>

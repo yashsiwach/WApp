@@ -39,20 +39,24 @@ interface TicketSummaryApiDto {
 export class SupportService {
   constructor(private readonly api: ApiService) {}
 
+  // Load a lightweight ticket list for the main support inbox view.
   getTickets(): Observable<SupportTicketDto[]> {
     return this.api
       .get<PaginatedResult<TicketSummaryApiDto>>('/api/support/tickets', { page: 1, size: 50 })
       .pipe(map((res) => (res.items ?? []).map((t) => this.mapSummaryToDto(t))));
   }
 
+  // Create a new support ticket and map the API response into the UI model.
   createTicket(payload: CreateTicketRequest): Observable<SupportTicketDto> {
     return this.api.post<TicketApiDto>('/api/support/tickets', payload).pipe(map((t) => this.mapTicketToDto(t)));
   }
 
+  // Load one ticket with its reply history for the detail panel.
   getTicket(id: string): Observable<SupportTicketDto> {
     return this.api.get<TicketApiDto>(`/api/support/tickets/${id}`).pipe(map((t) => this.mapTicketToDto(t)));
   }
 
+  // Convert summary rows into the ticket shape expected by the support screen.
   private mapSummaryToDto(t: TicketSummaryApiDto): SupportTicketDto {
     return {
       id: t.id,
@@ -68,6 +72,7 @@ export class SupportService {
     };
   }
 
+  // Sort replies newest-first and surface the latest non-user reply as the admin response.
   private mapTicketToDto(t: TicketApiDto): SupportTicketDto {
     const replies = [...(t.replies ?? [])].sort((a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),

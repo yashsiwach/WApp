@@ -12,296 +12,7 @@ import { CatalogAdminItemDto, CreateCatalogItemRequest, UpdateCatalogItemRequest
   selector: 'app-admin-catalog',
   standalone: true,
   imports: [DecimalPipe, ReactiveFormsModule, LoaderComponent],
-  template: `
-    <div class="space-y-4">
-
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 class="text-xl font-display font-bold text-zinc-100">Rewards Catalog</h2>
-          <p class="text-zinc-500 text-sm mt-0.5">{{ catalogItems.length }} item{{ catalogItems.length === 1 ? '' : 's' }}</p>
-        </div>
-        <button
-          type="button"
-          (click)="showCreateCatalog = true"
-          class="shrink-0 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-sm font-semibold transition-colors"
-        >
-          + Add Item
-        </button>
-      </div>
-
-      <app-loader [show]="loadingCatalog" />
-
-      @if (!loadingCatalog) {
-        @if (catalogItems.length === 0) {
-          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
-            <p class="text-4xl mb-3">🏷️</p>
-            <p class="text-zinc-400 text-sm font-medium">No catalog items yet.</p>
-            <p class="text-zinc-600 text-xs mt-1">Add items for users to redeem with reward points.</p>
-            <button
-              type="button"
-              (click)="showCreateCatalog = true"
-              class="mt-4 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-sm font-semibold transition-colors"
-            >+ Add First Item</button>
-          </div>
-        } @else {
-          <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="border-b border-zinc-700 text-zinc-400 text-left">
-                    <th class="px-4 py-3 font-medium">Item</th>
-                    <th class="px-4 py-3 font-medium">Category</th>
-                    <th class="px-4 py-3 font-medium">Points Cost</th>
-                    <th class="px-4 py-3 font-medium">Status</th>
-                    <th class="px-4 py-3 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-zinc-800">
-                  @for (item of catalogItems; track item.id) {
-                    <tr class="hover:bg-zinc-800/60 transition-colors">
-                      <td class="px-4 py-3">
-                        <p class="text-zinc-100 font-medium">{{ item.name }}</p>
-                        <p class="text-zinc-500 text-xs mt-0.5 max-w-60 truncate">{{ item.description }}</p>
-                      </td>
-                      <td class="px-4 py-3">
-                        <span class="px-2 py-0.5 bg-zinc-700 text-zinc-300 rounded-full text-xs">{{ item.category }}</span>
-                      </td>
-                      <td class="px-4 py-3">
-                        <span class="text-amber-300 font-semibold">{{ item.pointsCost | number }} pts</span>
-                      </td>
-                      <td class="px-4 py-3">
-                        <span
-                          class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                          [class.bg-emerald-500/20]="item.isActive"
-                          [class.text-emerald-300]="item.isActive"
-                          [class.bg-zinc-700]="!item.isActive"
-                          [class.text-zinc-400]="!item.isActive"
-                        >{{ item.isActive ? 'Active' : 'Inactive' }}</span>
-                      </td>
-                      <td class="px-4 py-3 flex gap-2">
-                        <button
-                          type="button"
-                          (click)="openEditModal(item)"
-                          class="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600 text-blue-300 text-xs rounded-lg font-medium transition-colors"
-                        >Edit</button>
-                        <button
-                          type="button"
-                          (click)="openDeleteModal(item)"
-                          class="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-600 text-rose-300 text-xs rounded-lg font-medium transition-colors"
-                        >Delete</button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        }
-      }
-    </div>
-
-    <!-- ── Create Catalog Item Modal ── -->
-    @if (showCreateCatalog) {
-      <div class="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl w-full max-w-md p-6">
-          <div class="flex justify-between items-center mb-5">
-            <h3 class="text-lg font-bold text-zinc-100">Add Catalog Item</h3>
-            <button
-              type="button"
-              (click)="showCreateCatalog = false"
-              class="text-zinc-500 hover:text-zinc-300 text-2xl leading-none"
-            >×</button>
-          </div>
-          <form [formGroup]="catalogForm" (ngSubmit)="submitCatalogItem()" novalidate class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1.5">Item Name <span class="text-rose-400">*</span></label>
-              <input
-                type="text"
-                formControlName="name"
-                placeholder="e.g. Amazon Gift Card ₹500"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-                [class.border-rose-500]="catalogSubmitted && catalogForm.controls.name.invalid"
-              />
-              @if (catalogSubmitted && catalogForm.controls.name.invalid) {
-                <p class="text-rose-400 text-xs mt-1">Item name is required.</p>
-              }
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1.5">Description</label>
-              <textarea
-                formControlName="description"
-                rows="2"
-                placeholder="Brief description of the reward…"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 resize-none"
-              ></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1.5">Category</label>
-              <select
-                formControlName="category"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-              >
-                <option value="GiftCard">Gift Card</option>
-                <option value="Cashback">Cashback</option>
-                <option value="Voucher">Voucher</option>
-                <option value="Merchandise">Merchandise</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1.5">Points Cost <span class="text-rose-400">*</span></label>
-              <input
-                type="number"
-                formControlName="pointsCost"
-                min="1"
-                placeholder="e.g. 500"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-                [class.border-rose-500]="catalogSubmitted && catalogForm.controls.pointsCost.invalid"
-              />
-              @if (catalogSubmitted && catalogForm.controls.pointsCost.invalid) {
-                <p class="text-rose-400 text-xs mt-1">Points cost must be at least 1.</p>
-              }
-            </div>
-            <div class="flex gap-3 pt-2">
-              <button
-                type="button"
-                (click)="showCreateCatalog = false"
-                class="flex-1 border border-zinc-700 text-zinc-300 font-semibold py-3 rounded-xl hover:bg-zinc-800 transition-colors"
-              >Cancel</button>
-              <button
-                type="submit"
-                [disabled]="catalogLoading"
-                class="flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold py-3 rounded-xl disabled:opacity-60 transition-colors"
-              >{{ catalogLoading ? 'Adding…' : 'Add Item' }}</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    }
-
-    <!-- ── Edit Catalog Item Modal ── -->
-    @if (editingItem) {
-      <div class="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl w-full max-w-md p-6">
-          <div class="flex justify-between items-center mb-5">
-            <h3 class="text-lg font-bold text-zinc-100">Edit Catalog Item</h3>
-            <button
-              type="button"
-              (click)="closeEditModal()"
-              class="text-zinc-500 hover:text-zinc-300 text-2xl leading-none"
-            >×</button>
-          </div>
-          <form [formGroup]="editForm" (ngSubmit)="submitEditCatalogItem()" novalidate class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1.5">Item Name <span class="text-rose-400">*</span></label>
-              <input
-                type="text"
-                formControlName="name"
-                placeholder="e.g. Amazon Gift Card ₹500"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
-                [class.border-rose-500]="editSubmitted && editForm.controls.name.invalid"
-              />
-              @if (editSubmitted && editForm.controls.name.invalid) {
-                <p class="text-rose-400 text-xs mt-1">Item name is required.</p>
-              }
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1.5">Description</label>
-              <textarea
-                formControlName="description"
-                rows="2"
-                placeholder="Brief description of the reward…"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-400/30 resize-none"
-              ></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1.5">Category</label>
-              <select
-                formControlName="category"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
-              >
-                <option value="GiftCard">Gift Card</option>
-                <option value="Cashback">Cashback</option>
-                <option value="Voucher">Voucher</option>
-                <option value="Merchandise">Merchandise</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-zinc-300 mb-1.5">Points Cost <span class="text-rose-400">*</span></label>
-              <input
-                type="number"
-                formControlName="pointsCost"
-                min="1"
-                placeholder="e.g. 500"
-                class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
-                [class.border-rose-500]="editSubmitted && editForm.controls.pointsCost.invalid"
-              />
-              @if (editSubmitted && editForm.controls.pointsCost.invalid) {
-                <p class="text-rose-400 text-xs mt-1">Points cost must be at least 1.</p>
-              }
-            </div>
-            <div>
-              <label class="flex items-center gap-3 text-sm font-medium text-zinc-300">
-                <input
-                  type="checkbox"
-                  formControlName="isActive"
-                  class="w-4 h-4 bg-zinc-950 border border-zinc-700 rounded cursor-pointer"
-                />
-                Active
-              </label>
-            </div>
-            <div class="flex gap-3 pt-2">
-              <button
-                type="button"
-                (click)="closeEditModal()"
-                class="flex-1 border border-zinc-700 text-zinc-300 font-semibold py-3 rounded-xl hover:bg-zinc-800 transition-colors"
-              >Cancel</button>
-              <button
-                type="submit"
-                [disabled]="catalogLoading"
-                class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl disabled:opacity-60 transition-colors"
-              >{{ catalogLoading ? 'Updating…' : 'Update Item' }}</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    }
-
-    <!-- ── Delete Confirmation Modal ── -->
-    @if (deleteItem) {
-      <div class="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl w-full max-w-sm p-6">
-          <div class="flex justify-between items-center mb-5">
-            <h3 class="text-lg font-bold text-zinc-100">Delete Catalog Item</h3>
-            <button
-              type="button"
-              (click)="closeDeleteModal()"
-              class="text-zinc-500 hover:text-zinc-300 text-2xl leading-none"
-            >×</button>
-          </div>
-          <div class="space-y-4 mb-6">
-            <p class="text-zinc-300">Are you sure you want to delete <strong>{{ deleteItem.name }}</strong>?</p>
-            <p class="text-zinc-500 text-sm">This action cannot be undone. All users will be unable to redeem this item.</p>
-          </div>
-          <div class="flex gap-3">
-            <button
-              type="button"
-              (click)="closeDeleteModal()"
-              class="flex-1 border border-zinc-700 text-zinc-300 font-semibold py-3 rounded-xl hover:bg-zinc-800 transition-colors"
-            >Cancel</button>
-            <button
-              type="button"
-              (click)="confirmDelete()"
-              [disabled]="catalogLoading"
-              class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 rounded-xl disabled:opacity-60 transition-colors"
-            >{{ catalogLoading ? 'Deleting…' : 'Delete' }}</button>
-          </div>
-        </div>
-      </div>
-    }
-  `,
+  templateUrl: './admin-catalog.component.html',
 })
 export class AdminCatalogComponent implements OnInit {
   loadingCatalog = false;
@@ -341,6 +52,7 @@ export class AdminCatalogComponent implements OnInit {
     this.loadCatalog();
   }
 
+  // Load the current catalog items shown in the admin management table.
   loadCatalog(): void {
     this.loadingCatalog = true;
     this.adminService.getCatalogItems().subscribe({
@@ -354,6 +66,7 @@ export class AdminCatalogComponent implements OnInit {
     });
   }
 
+  // Validate and submit the create form, then prepend the new item to the local table state.
   submitCatalogItem(): void {
     this.catalogSubmitted = true;
     if (this.catalogForm.invalid) return;
@@ -377,6 +90,7 @@ export class AdminCatalogComponent implements OnInit {
     });
   }
 
+  // Open the edit modal and seed the form with the selected catalog item values.
   openEditModal(item: CatalogAdminItemDto): void {
     this.editingItem = item;
     this.editForm.reset({
@@ -389,11 +103,13 @@ export class AdminCatalogComponent implements OnInit {
     this.editSubmitted = false;
   }
 
+  // Close the edit modal and clear its validation state.
   closeEditModal(): void {
     this.editingItem = null;
     this.editSubmitted = false;
   }
 
+  // Persist edits for the selected catalog item and replace the matching row in the local list.
   submitEditCatalogItem(): void {
     this.editSubmitted = true;
     if (this.editForm.invalid || !this.editingItem) return;
@@ -422,14 +138,17 @@ export class AdminCatalogComponent implements OnInit {
     });
   }
 
+  // Open the delete confirmation modal for the selected catalog item.
   openDeleteModal(item: CatalogAdminItemDto): void {
     this.deleteItem = item;
   }
 
+  // Close the delete confirmation modal without changing the table.
   closeDeleteModal(): void {
     this.deleteItem = null;
   }
 
+  // Remove the selected catalog item and drop its row from the local table on success.
   confirmDelete(): void {
     if (!this.deleteItem) return;
     this.catalogLoading = true;

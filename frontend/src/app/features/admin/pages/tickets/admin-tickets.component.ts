@@ -12,221 +12,7 @@ import { TicketDetailDto, TicketSummaryDto } from '../../../../shared/models/adm
   selector: 'app-admin-tickets',
   standalone: true,
   imports: [DatePipe, FormsModule, ReactiveFormsModule, LoaderComponent],
-  template: `
-    <div class="space-y-4">
-
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 class="text-xl font-display font-bold text-zinc-100">Support Tickets</h2>
-          <p class="text-zinc-500 text-sm mt-0.5">{{ totalCount }} total ticket{{ totalCount === 1 ? '' : 's' }}</p>
-        </div>
-        <button
-          type="button"
-          (click)="loadTickets()"
-          [disabled]="loading"
-          class="shrink-0 px-4 py-2 rounded-xl border border-zinc-700 text-sm text-zinc-300 hover:border-amber-400/40 hover:text-amber-300 transition-colors disabled:opacity-50"
-        >
-          ↻ Refresh
-        </button>
-      </div>
-
-      <!-- Filters -->
-      <div class="flex flex-wrap gap-3">
-        <select
-          [(ngModel)]="filterStatus"
-          (change)="onFilterChange()"
-          class="px-3 py-2 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-        >
-          @for (opt of statusOptions; track opt.value) {
-            <option [value]="opt.value">{{ opt.label }}</option>
-          }
-        </select>
-
-        <select
-          [(ngModel)]="filterPriority"
-          (change)="onFilterChange()"
-          class="px-3 py-2 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-        >
-          @for (opt of priorityOptions; track opt.value) {
-            <option [value]="opt.value">{{ opt.label }}</option>
-          }
-        </select>
-
-        <select
-          [(ngModel)]="filterCategory"
-          (change)="onFilterChange()"
-          class="px-3 py-2 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
-        >
-          @for (opt of categoryOptions; track opt.value) {
-            <option [value]="opt.value">{{ opt.label }}</option>
-          }
-        </select>
-
-        @if (filterStatus || filterPriority || filterCategory) {
-          <button
-            type="button"
-            (click)="clearFilters()"
-            class="px-3 py-2 rounded-xl border border-zinc-700 text-xs text-zinc-400 hover:text-rose-400 hover:border-rose-400/40 transition-colors"
-          >
-            ✕ Clear filters
-          </button>
-        }
-      </div>
-
-      <app-loader [show]="loading" />
-
-      @if (!loading) {
-        @if (tickets.length === 0) {
-          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-12 text-center">
-            <p class="text-4xl mb-3">🎫</p>
-            <p class="text-zinc-400 text-sm">No tickets found with the current filters.</p>
-          </div>
-        } @else {
-          <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="border-b border-zinc-700 text-zinc-400 text-left">
-                    <th class="px-4 py-3 font-medium">Ticket</th>
-                    <th class="px-4 py-3 font-medium">Meta</th>
-                    <th class="px-4 py-3 font-medium">Status</th>
-                    <th class="px-4 py-3 font-medium">Created</th>
-                    <th class="px-4 py-3 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-zinc-800">
-                  @for (ticket of tickets; track ticket.id) {
-                    <tr class="hover:bg-zinc-800/60 transition-colors">
-                      <td class="px-4 py-3 min-w-56">
-                        <p class="text-zinc-100 text-sm font-medium truncate max-w-52">{{ ticket.subject }}</p>
-                        <p class="text-zinc-500 text-xs mt-0.5">#{{ ticket.ticketNumber }}</p>
-                      </td>
-                      <td class="px-4 py-3 text-zinc-400 text-xs space-y-0.5">
-                        <div>{{ ticket.category }}</div>
-                        <div class="flex items-center gap-1">
-                          <span
-                            class="inline-block h-1.5 w-1.5 rounded-full"
-                            [class.bg-rose-400]="ticket.priority === 'Urgent'"
-                            [class.bg-amber-400]="ticket.priority === 'High'"
-                            [class.bg-sky-400]="ticket.priority === 'Medium'"
-                            [class.bg-zinc-500]="ticket.priority === 'Low'"
-                          ></span>
-                          {{ ticket.priority }}
-                        </div>
-                        <div>{{ ticket.replyCount }} {{ ticket.replyCount === 1 ? 'reply' : 'replies' }}</div>
-                      </td>
-                      <td class="px-4 py-3">
-                        <span
-                          class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                          [class.bg-yellow-500/20]="ticket.status === 'Open'"
-                          [class.text-yellow-300]="ticket.status === 'Open'"
-                          [class.bg-amber-500/20]="ticket.status === 'InProgress'"
-                          [class.text-amber-300]="ticket.status === 'InProgress'"
-                          [class.bg-fuchsia-500/20]="ticket.status === 'Responded'"
-                          [class.text-fuchsia-300]="ticket.status === 'Responded'"
-                          [class.bg-emerald-500/20]="ticket.status === 'Resolved'"
-                          [class.text-emerald-300]="ticket.status === 'Resolved'"
-                          [class.bg-zinc-700]="ticket.status === 'Closed'"
-                          [class.text-zinc-400]="ticket.status === 'Closed'"
-                        >{{ ticket.status }}</span>
-                      </td>
-                      <td class="px-4 py-3 text-zinc-400 text-xs">{{ ticket.createdAt | date:'dd MMM, HH:mm' }}</td>
-                      <td class="px-4 py-3">
-                        <button
-                          type="button"
-                          (click)="openTicket(ticket)"
-                          [disabled]="ticketDetailLoadingId === ticket.id"
-                          class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs rounded-lg font-medium transition-colors disabled:opacity-50"
-                        >{{ ticketDetailLoadingId === ticket.id ? 'Loading…' : 'View' }}</button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        }
-      }
-    </div>
-
-    <!-- ── Ticket Detail / Reply Modal ── -->
-    @if (viewTicket) {
-      <div class="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h3 class="text-base font-bold text-zinc-100">Ticket #{{ viewTicket.ticketNumber }}</h3>
-              <p class="text-xs text-zinc-500 mt-0.5">{{ viewTicket.category }} · {{ viewTicket.priority }} priority</p>
-            </div>
-            <button (click)="closeView()" class="text-zinc-500 hover:text-zinc-300 text-2xl leading-none ml-4">×</button>
-          </div>
-
-          <p class="text-sm font-medium text-zinc-200 mb-1">{{ viewTicket.subject }}</p>
-          <div class="bg-zinc-800 rounded-xl p-3 mb-4 text-sm text-zinc-300 leading-relaxed">
-            {{ viewTicket.description }}
-          </div>
-
-          @if (viewTicket.adminReply) {
-            <div class="bg-amber-400/10 border border-amber-400/20 rounded-xl p-3 mb-4 text-sm">
-              <p class="text-xs text-amber-400 font-medium mb-1">
-                Admin Reply
-                @if (viewTicket.respondedAt) {
-                  — {{ viewTicket.respondedAt | date:'dd MMM, HH:mm' }}
-                }
-              </p>
-              <p class="text-zinc-300">{{ viewTicket.adminReply }}</p>
-            </div>
-          }
-
-          @if (viewTicket.status !== 'Closed') {
-            <form [formGroup]="replyForm" (ngSubmit)="submitReply()" novalidate class="space-y-3 mt-2">
-              <div>
-                <label class="block text-sm font-medium text-zinc-300 mb-1.5">Reply to User</label>
-                <textarea
-                  formControlName="reply"
-                  rows="4"
-                  placeholder="Type your response…"
-                  class="w-full px-4 py-2.5 border border-zinc-700 bg-zinc-950 rounded-xl text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-400/30 resize-none"
-                  [class.border-rose-500]="replySubmitted && replyForm.controls.reply.invalid"
-                ></textarea>
-                @if (replySubmitted && replyForm.controls.reply.invalid) {
-                  <p class="text-rose-400 text-xs mt-1">Reply message is required.</p>
-                }
-              </div>
-              <div class="flex gap-2">
-                <button
-                  type="button"
-                  (click)="closeView()"
-                  class="flex-1 border border-zinc-700 text-zinc-300 font-semibold py-2.5 rounded-xl hover:bg-zinc-800 text-sm transition-colors"
-                >Cancel</button>
-                <button
-                  type="button"
-                  (click)="closeTicketAction()"
-                  [disabled]="closeLoading || replyLoading"
-                  class="px-4 py-2.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 font-semibold rounded-xl disabled:opacity-50 text-sm transition-colors"
-                >{{ closeLoading ? 'Closing…' : 'Close Ticket' }}</button>
-                <button
-                  type="submit"
-                  [disabled]="replyLoading || closeLoading"
-                  class="flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold py-2.5 rounded-xl disabled:opacity-60 text-sm transition-colors"
-                >{{ replyLoading ? 'Sending…' : 'Send Reply' }}</button>
-              </div>
-            </form>
-          } @else {
-            <div class="mt-4">
-              <button
-                type="button"
-                (click)="closeView()"
-                class="w-full border border-zinc-700 text-zinc-300 font-semibold py-2.5 rounded-xl hover:bg-zinc-800 text-sm transition-colors"
-              >Close</button>
-              <p class="text-zinc-600 text-xs text-center mt-2">This ticket has been closed.</p>
-            </div>
-          }
-        </div>
-      </div>
-    }
-  `,
+  templateUrl: './admin-tickets.component.html',
 })
 export class AdminTicketsComponent implements OnInit {
   loading = false;
@@ -282,6 +68,7 @@ export class AdminTicketsComponent implements OnInit {
     this.loadTickets();
   }
 
+  // Load the admin ticket table using the current filter set and pagination values.
   loadTickets(): void {
     this.loading = true;
     this.adminService.getTicketsPaginated({
@@ -303,11 +90,13 @@ export class AdminTicketsComponent implements OnInit {
     });
   }
 
+  // Reset paging whenever a filter changes so results always start from the first page.
   onFilterChange(): void {
     this.currentPage = 1;
     this.loadTickets();
   }
 
+  // Clear every ticket filter and reload the default result set.
   clearFilters(): void {
     this.filterStatus = '';
     this.filterPriority = '';
@@ -315,6 +104,7 @@ export class AdminTicketsComponent implements OnInit {
     this.onFilterChange();
   }
 
+  // Load one ticket's full details and open the reply modal for it.
   openTicket(ticket: TicketSummaryDto): void {
     this.ticketDetailLoadingId = ticket.id;
     this.adminService.getTicket(ticket.id).subscribe({
@@ -331,11 +121,13 @@ export class AdminTicketsComponent implements OnInit {
     });
   }
 
+  // Close the ticket detail modal and clear reply validation state.
   closeView(): void {
     this.viewTicket = null;
     this.replySubmitted = false;
   }
 
+  // Send the current admin reply and refresh the table to reflect the latest ticket state.
   submitReply(): void {
     this.replySubmitted = true;
     if (this.replyForm.invalid || !this.viewTicket) return;
@@ -346,6 +138,7 @@ export class AdminTicketsComponent implements OnInit {
         this.replyLoading = false;
         this.replyForm.reset();
         this.replySubmitted = false;
+        // Update the open detail modal immediately so the new reply appears without reopening it.
         if (this.viewTicket) this.viewTicket.adminReply = message;
         this.toastService.success('Reply sent successfully.');
         this.loadTickets();
@@ -357,6 +150,7 @@ export class AdminTicketsComponent implements OnInit {
     });
   }
 
+  // Close the current ticket and refresh the table to reflect the new status.
   closeTicketAction(): void {
     if (!this.viewTicket) return;
     this.closeLoading = true;

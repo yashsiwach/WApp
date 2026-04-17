@@ -21,4 +21,5 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
     </div>
   `,
 })
+// Provide the authenticated app shell that wraps feature pages with shared navigation.
 export class LayoutComponent {}

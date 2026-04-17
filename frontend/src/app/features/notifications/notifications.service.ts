@@ -8,6 +8,7 @@ import { NotificationListResponse } from '../../shared/models/notification.model
 export class NotificationsService {
   constructor(private readonly api: ApiService) {}
 
+  // Load one page of notifications for the inbox view.
   getNotifications(page = 1, pageSize = 20): Observable<NotificationListResponse> {
     return this.api.get<NotificationListResponse>('/api/notifications', { page, size: pageSize });
   }

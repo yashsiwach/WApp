@@ -21,6 +21,7 @@ function escapeCsv(value: string | number): string {
 
 @Injectable({ providedIn: 'root' })
 export class TransactionCsvService {
+  // Convert wallet transactions into CSV rows and trigger a file download in the browser.
   download(wallet: WalletResponse, transactions: TransactionResponse[]): void {
     const headers = [
       'Transaction ID',

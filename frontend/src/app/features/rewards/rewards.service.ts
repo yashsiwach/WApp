@@ -13,6 +13,7 @@ import {
 export class RewardsService {
   constructor(private readonly api: ApiService) {}
 
+  // Load the rewards account and backfill missing lifetime totals used by the UI.
   getRewards(): Observable<RewardResponse> {
     return this.api.get<RewardResponse>('/api/rewards/account').pipe(
       map((account) => ({
@@ -22,6 +23,7 @@ export class RewardsService {
     );
   }
 
+  // Load reward activity and normalize field names coming from older API payloads.
   getHistory(): Observable<RewardTransactionResponse[]> {
     return this.api
       .get<PaginatedResult<RewardTransactionApiResponse>>('/api/rewards/transactions')

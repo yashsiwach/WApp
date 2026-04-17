@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
 
+// Define the lazy-loaded admin area and its child pages.
 export const adminRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
       import('./layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     children: [
+      // Default the admin landing page to the overview dashboard.
       { path: '', redirectTo: 'overview', pathMatch: 'full' },
       {
         path: 'overview',
