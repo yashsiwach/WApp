@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm uninstall *)",
+      "Bash(npm list *)",
+      "PowerShell(Start-Process -FilePath \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\uninstall.exe\" -Wait -PassThru)",
+      "PowerShell(Start-Process -FilePath \"C:\\\\Users\\\\yashs\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\uninstall.exe\" -Wait -PassThru)"
+    ]
+  }
+}

@@ -30,6 +30,8 @@ export class AdminTicketsComponent implements OnInit {
   currentPage = 1;
   readonly pageSize = 20;
 
+   selectedname='';
+   lastname='';
   readonly statusOptions = [
     { value: '', label: 'All Statuses' },
     { value: 'Open', label: 'Open' },
